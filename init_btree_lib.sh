@@ -1,0 +1,1 @@
+cd bt && make clean && make && cd ..
