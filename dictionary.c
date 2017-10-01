@@ -14,7 +14,7 @@ void createDictionary(BTA *dict, char * notify) {
 
     int WordCount = 0;
 
-    //dict = btcrt("BTree_dict.dat", 0, 0);
+    dict = btcrt("BTree_dict.dat", 0, 0);
 
     char *filename="EV_text_dict.txt";
     wchar_t * tmp_word; // widechar word
@@ -71,13 +71,9 @@ void createDictionary(BTA *dict, char * notify) {
                 wcstombs(word, tmp_word, WORD_MAX_LEN*sizeof(char));
                 wcstombs(meaning, tmp_meaning, MEAN_MAX_LEN*sizeof(char));
                 
-                printf("WORD: '%s'\n%s\n", word, meaning);
+                //printf("WORD: '%s'\n%s\n", word, meaning);
 
                 dictAddWord(dict, word, meaning);
-
-                if (strcmp(word, "hello") == 0) {
-                    getch();
-                }
                 
                 WordCount++;
             }

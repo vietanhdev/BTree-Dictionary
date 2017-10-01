@@ -57,18 +57,6 @@ void searchBuff_search() {
     }
 }
 
-// void test_search() {
-//     printf("\nsearching: '%s'\n", searchBox);
-//     char meaning[MEAN_MAX_LEN];
-//     int searchResult = dictFindWord(dict, searchBox, meaning);
-//     if (searchResult != 0) {
-//         printf("This word this not in my dictionary.");
-//     } else {
-//         printf("meaning: %s\n", meaning);
-//     }
-
-//     getch();
-// }
 
 int main(int argc, char const *argv[])
 {
