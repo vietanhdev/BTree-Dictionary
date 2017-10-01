@@ -54,7 +54,7 @@ void UI_Menu() {
         c = getch();
 
         switch(c) {
-            case 't': createDictionary(dict, notify1); return;
+            case 'l': createDictionary(dict, notify1); return;
             case 'x': return;
             default: strcpy(menuNotify, "Invalid selection!");
         }

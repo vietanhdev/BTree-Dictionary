@@ -5,15 +5,13 @@
 #endif
 
 
-#define MENUOPT 5
+#define MENUOPT 3
 static const char menuShortcuts[MENUOPT][5] = {
-    "a","d","c","l","t"
+    "a","d","l"
 };
 static const char menu[MENUOPT][60] = {
     "Add a word",
     "Delete a word",
-    "Create a dictionary",
-    "Load a dictionary",
     "Load from txt file (Only supported format)"
 };
 

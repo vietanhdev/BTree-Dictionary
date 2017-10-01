@@ -4,15 +4,17 @@
 #include "extio.h"
 #include "dictionary.h"
 #include "UI.h"
-
-
+#include "string_ext.h"
 
 
 void createDictionary(BTA *dict, char * notify) {
 
     printf("\nCreating Dictionary...");
 
-    int WordCount = 0;
+    int WordCount = 0; // count the number of words in dictionary
+
+    btcls(dict); // close if a dictionary file was opened. 
+    // below line is required for operating correctly.
 
     dict = btcrt("BTree_dict.dat", 0, 0);
 
@@ -82,18 +84,33 @@ void createDictionary(BTA *dict, char * notify) {
     fclose(f);
     sprintf(notify, "Loading done. %d words was loaded.", WordCount);
 
-    getch();
 
 }
 
 
 int dictFindWord(BTA * dict, char * word, char * meaning) {
-    //strLower(word, word);
+    char wordLower[WORD_MAX_LEN];
+    strLower(wordLower, word);
     int meaningLength;
-    return btsel(dict, word, meaning, MEAN_MAX_LEN, &meaningLength);
+    return btsel(dict, wordLower, meaning, MEAN_MAX_LEN, &meaningLength);
 }
 
 int dictAddWord(BTA * dict, char * word, char * meaning) {
-    //strLower(word, word);
-    return btins(dict, word, meaning, MEAN_MAX_LEN*sizeof(char));
+    char wordLower[WORD_MAX_LEN];
+    char old_meaning[MEAN_MAX_LEN];
+    int find;
+
+    // do not add word if word string is empty
+    if (strlen(word) <= 0) {
+        return 1;
+    }
+
+    // if word is already available in database, concat new meaning to the end of old meaning
+    find = dictFindWord(dict, word, old_meaning);
+    if (find == 0) {
+        sprintf(meaning, "%s%s", old_meaning, meaning);
+    }
+
+    strLower(wordLower, word);
+    return btins(dict, wordLower, meaning, MEAN_MAX_LEN*sizeof(char));
 }
