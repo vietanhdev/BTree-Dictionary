@@ -56,6 +56,10 @@ int main(int argc, char const *argv[])
     btinit();
     dict = btopn("BTree_dict.dat", 0, FALSE);
 
+
+    printf("%p\n", dict);
+    getch();
+
     char c;
     while (1) {
         UI_InfoBoard();
@@ -69,7 +73,6 @@ int main(int argc, char const *argv[])
             case 93: UI_Menu(dict); break; // ] for menu
             case '\n': searchBuff_search(); break; // Enter to search
             case 127: searchBuff_backspace(); break; // Backspace
-            //case 't': test_search(); break;
             default: searchBuff_add(c);
 
         }

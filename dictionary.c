@@ -103,8 +103,11 @@ int dictAddWord(BTA * dict, char * word, char * meaning) {
     char old_meaning[MEAN_MAX_LEN];
     int find;
 
+    int return_value; // return value of this function
+
     // do not add word if word string is empty
     if (strlen(word) <= 0) {
+        printf("Stringlen<=0\n"); getch();
         return 1;
     }
 
@@ -115,5 +118,9 @@ int dictAddWord(BTA * dict, char * word, char * meaning) {
     }
 
     strLower(wordLower, word);
-    return btins(dict, wordLower, meaning, MEAN_MAX_LEN*sizeof(char));
+    
+    return_value = btins(dict, wordLower, meaning, MEAN_MAX_LEN*sizeof(char));
+    printf("%d\n", return_value); getch();
+
+    return return_value;
 }

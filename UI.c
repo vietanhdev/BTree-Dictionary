@@ -63,6 +63,10 @@ void UI_Search(char * searchBox) {
 void UI_Notify() {
     printf("%s\n", notify1);
     printf("%s\n", notify2);
+
+    // empty notifications after displaying
+    strcpy(notify1, "");
+    strcpy(notify2, "");
 }
 
 void UI_Notify1_Push(char * s) {
@@ -75,16 +79,13 @@ void UI_Notify2_Push(char * s) {
 
 
 void UI_Dict_AddWord(BTA * dict) {
-    char * word;
-    char * meaning;
-    word = malloc(WORD_MAX_LEN * sizeof(word[0]));
-    meaning = malloc(MEAN_MAX_LEN * sizeof(meaning[0]));
-
+    char word[WORD_MAX_LEN];
+    char meaning[MEAN_MAX_LEN];
     printf("\n*** ADD A WORD:\n");
     printf("Word: "); readLn(stdin, word, WORD_MAX_LEN);
-    printf("'''%s'''\n", word);
     printf("Meaning:\n"); readLn(stdin, meaning, MEAN_MAX_LEN);
     dictAddWord(dict, word, meaning);
+    sprintf(notify1, "Added a word: '%s'", word);
 }
 
 
