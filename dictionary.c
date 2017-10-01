@@ -120,7 +120,7 @@ int dictAddWord(BTA * dict, char * word, char * meaning) {
     strLower(wordLower, word);
     
     return_value = btins(dict, wordLower, meaning, MEAN_MAX_LEN*sizeof(char));
-    printf("%d\n", return_value); getch();
+    //printf("%d\n", return_value); getch();
 
     return return_value;
 }

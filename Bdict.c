@@ -56,10 +56,6 @@ int main(int argc, char const *argv[])
     btinit();
     dict = btopn("BTree_dict.dat", 0, FALSE);
 
-
-    printf("%p\n", dict);
-    getch();
-
     char c;
     while (1) {
         UI_InfoBoard();
