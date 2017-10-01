@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <string.h>
 #include "UI.h"
 #include "extio.h"
@@ -5,22 +6,11 @@
 #include "btree.h"
 
 
-BTA * dict;
-char * notify1;
-char * notify2;
-char * meaningArea;
+char searchBox[WORD_MAX_LEN] = "";
+char notify1[NOTIFY_MAX_LEN] = "";
+char notify2[NOTIFY_MAX_LEN] = "";
+char meaningArea[MEAN_MAX_LEN] = "";
 
-void UI_init(BTA * g_dict, char * g_meaningArea, char * g_notify1, char * g_notify2) {
-    dict = g_dict;
-    notify1 = g_notify1;
-    notify2 = g_notify2;
-    meaningArea = g_meaningArea;
-    notify1[0] = '\0';
-    notify2[0] = '\0';
-    meaningArea[0] = '\0';
-    UI_Notify1_Push("");
-    UI_Notify2_Push("");
-}
 
 void UI_InfoBoard() {
     clear();
@@ -32,7 +22,7 @@ void UI_InfoBoard() {
     }
 }
 
-void UI_Menu() {
+void UI_Menu(BTA * dict) {
     int i;
     char c;
     char menuNotify[UI_MENU_NOTIFY_LENGTH] = "";
@@ -54,6 +44,8 @@ void UI_Menu() {
         c = getch();
 
         switch(c) {
+            case 'a': UI_Dict_AddWord(dict); return;
+            case 'd': UI_Dict_DeleteWord(dict); return;
             case 'l': createDictionary(dict, notify1); return;
             case 'x': return;
             default: strcpy(menuNotify, "Invalid selection!");
@@ -81,8 +73,32 @@ void UI_Notify2_Push(char * s) {
     strcpy(notify2, s);
 }
 
-void gotoxy(int x,int y) {
-    printf("%c[%d;%df",0x1B,y,x);
-    fflush(stdout);
+
+void UI_Dict_AddWord(BTA * dict) {
+    char * word;
+    char * meaning;
+    word = malloc(WORD_MAX_LEN * sizeof(word[0]));
+    meaning = malloc(MEAN_MAX_LEN * sizeof(meaning[0]));
+
+    printf("\n*** ADD A WORD:\n");
+    printf("Word: "); readLn(stdin, word, WORD_MAX_LEN);
+    printf("'''%s'''\n", word);
+    printf("Meaning:\n"); readLn(stdin, meaning, MEAN_MAX_LEN);
+    dictAddWord(dict, word, meaning);
+}
+
+
+void UI_Dict_DeleteWord(BTA * dict) {
+    char word[WORD_MAX_LEN];
+    printf("\n*** DELETE A WORD:\n");
+    printf("Word: "); readLn(stdin, word, WORD_MAX_LEN);
+
+    BTint value = 0;
+    if (bfndky(dict, word, &value) != QNOKEY) { // found the word
+        bdelky(dict, word);
+        sprintf(notify1, "Deleted a word: '%s'", word);
+    } else {
+        sprintf(notify1, "Cannot find this word to delete: '%s'", word);
+    }
 }
 

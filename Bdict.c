@@ -10,16 +10,8 @@
 #include "extio.h"
 #include "UI.h"
 
-#define NOTIFY_MAX_LEN 2000
-
-
 
 BTA *dict;
-
-char searchBox[WORD_MAX_LEN] = "";
-char notify1[NOTIFY_MAX_LEN] = "";
-char notify2[NOTIFY_MAX_LEN] = "";
-char meaningArea[MEAN_MAX_LEN] = "";
 
 
 void quit() {
@@ -62,9 +54,7 @@ int main(int argc, char const *argv[])
 {
 
     btinit();
-    dict = btopn("BTree_dict.dat", 0, 0);
-
-    UI_init(dict, meaningArea, notify1, notify2);
+    dict = btopn("BTree_dict.dat", 0, FALSE);
 
     char c;
     while (1) {
@@ -76,7 +66,7 @@ int main(int argc, char const *argv[])
         
         switch(c) {
             case 27: quit(); return 0; // ESC to exit
-            case 93: UI_Menu(); break; // ] for menu
+            case 93: UI_Menu(dict); break; // ] for menu
             case '\n': searchBuff_search(); break; // Enter to search
             case 127: searchBuff_backspace(); break; // Backspace
             //case 't': test_search(); break;

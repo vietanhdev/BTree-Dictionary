@@ -59,6 +59,13 @@ int getch() {
   return ch;
 }
 
+
+void gotoxy(int x,int y) {
+    printf("%c[%d;%df",0x1B,y,x);
+    fflush(stdout);
+}
+
+
 void printUpper(char * s) {
   int i;
   for (i = 0; i < strlen(s); ++i) {

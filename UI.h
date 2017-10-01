@@ -1,8 +1,18 @@
 #include "btree.h"
 #include "extio.h"
+#include "dictionary.h"
+
 #ifndef UI_MENU_NOTIFY_LENGTH
 #define UI_MENU_NOTIFY_LENGTH 200
 #endif
+
+#define NOTIFY_MAX_LEN 2000
+
+
+extern char searchBox[WORD_MAX_LEN];
+extern char notify1[NOTIFY_MAX_LEN];
+extern char notify2[NOTIFY_MAX_LEN];
+extern char meaningArea[MEAN_MAX_LEN];
 
 
 #define MENUOPT 3
@@ -26,11 +36,15 @@ static const char InfoBoard[5][400] = {
 // PROTOTYPES
 void UI_init(BTA * g_dict, char * meaningArea, char * g_notify1, char * g_notify2);
 void UI_InfoBoard();
-void UI_Menu();
+void UI_Menu(BTA * dict);
 void UI_Search(char* searchBox);
 void UI_Notify();
 void UI_Notify1_Push(char * s);
 void UI_Notify2_Push(char * s);
 void gotoxy(int x, int y);
+
+// dictionary
+void UI_Dict_AddWord(BTA * dict);
+void UI_Dict_DeleteWord(BTA * dict);
 
 

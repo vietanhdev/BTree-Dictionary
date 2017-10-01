@@ -17,3 +17,4 @@ void removeLastEnter(char *s);
 char* readLn(FILE * fin, char *s, int max_len);
 int getch();
 void printUpper(char * s);
+void gotoxy(int x,int y);

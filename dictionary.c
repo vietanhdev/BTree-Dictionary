@@ -9,14 +9,14 @@
 
 void createDictionary(BTA *dict, char * notify) {
 
-    printf("\nCreating Dictionary...");
+    printf("\nCreating Dictionary..."); fflush(stdout);
 
     int WordCount = 0; // count the number of words in dictionary
 
     btcls(dict); // close if a dictionary file was opened. 
     // below line is required for operating correctly.
 
-    dict = btcrt("BTree_dict.dat", 0, 0);
+    dict = btcrt("BTree_dict.dat", 0, FALSE);
 
     char *filename="EV_text_dict.txt";
     wchar_t * tmp_word; // widechar word
@@ -84,7 +84,10 @@ void createDictionary(BTA *dict, char * notify) {
     fclose(f);
     sprintf(notify, "Loading done. %d words was loaded.", WordCount);
 
-
+    // Save the dictionary by re-opening
+    printf("\nSaving file...\n");
+    btcls(dict);
+    dict = btopn("BTree_dict.dat", 0, FALSE);
 }
 
 
