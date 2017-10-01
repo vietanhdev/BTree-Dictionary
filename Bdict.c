@@ -30,11 +30,8 @@ void quit() {
 }
 
 void searchBuff_add(char c) {
-    //printf("%d\n", c);
-    //getch();
     if (isalpha(c) || isdigit(c)) {
         sprintf(searchBox, "%s%c", searchBox, c);
-
     }
 }
 
@@ -44,20 +41,41 @@ void searchBuff_backspace() {
 }
 
 void searchBuff_search() {
+    if (strlen(searchBox) == 0) return;
     char meaning[MEAN_MAX_LEN];
     int searchResult = dictFindWord(dict, searchBox, meaning);
     if (searchResult != 0) {
         UI_Notify1_Push("This word this not in my dictionary.");
     } else {
-        strcpy(meaningArea, meaning);
+        clear();
+        UI_InfoBoard();
+        printf("[[[ "); printUpper(searchBox); printf(" ]]]");
+        printf("%s\n", meaning);
+        printf("Press any key to exit word view...\n");
+        getch();
+        strcpy(searchBox, "");
     }
 }
+
+// void test_search() {
+//     printf("\nsearching: '%s'\n", searchBox);
+//     char meaning[MEAN_MAX_LEN];
+//     int searchResult = dictFindWord(dict, searchBox, meaning);
+//     if (searchResult != 0) {
+//         printf("This word this not in my dictionary.");
+//     } else {
+//         printf("meaning: %s\n", meaning);
+//     }
+
+//     getch();
+// }
 
 int main(int argc, char const *argv[])
 {
 
     btinit();
-    btopn("BTree_dict.dat", 0, 0);
+    dict = btopn("BTree_dict.dat", 0, 0);
+
     UI_init(dict, meaningArea, notify1, notify2);
 
     char c;
@@ -73,7 +91,9 @@ int main(int argc, char const *argv[])
             case 93: UI_Menu(); break; // ] for menu
             case '\n': searchBuff_search(); break; // Enter to search
             case 127: searchBuff_backspace(); break; // Backspace
+            //case 't': test_search(); break;
             default: searchBuff_add(c);
+
         }
 
     }

@@ -65,7 +65,6 @@ void UI_Menu() {
 
 void UI_Search(char * searchBox) {
     printf("\n>> Search: "); printf("%s", searchBox);
-    printf("%s\n", meaningArea);
     gotoxy(12 + strlen(searchBox), 10);
 }
 

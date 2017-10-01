@@ -14,4 +14,4 @@
 
 void createDictionary(BTA *dict, char * notify);
 int dictFindWord(BTA *dict, char * word, char * meaning);
-int dictInsertWord(BTA *dict, char * word, char * meaning);
+int dictAddWord(BTA *dict, char * word, char * meaning);

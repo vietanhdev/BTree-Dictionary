@@ -11,8 +11,9 @@
 #define YELLOW 38
 #define NORMAL 0
 
-void printColor(char str[], int color);
+void printColor(const char * str, int color);
 void cleanStdin(void);
 void removeLastEnter(char *s);
 char* readLn(FILE * fin, char *s, int max_len);
 int getch();
+void printUpper(char * s);

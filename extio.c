@@ -3,9 +3,10 @@
 #include <stdlib.h>
 #include <termios.h>
 #include <unistd.h>
+#include <ctype.h>
 #include "extio.h"
 
-void printColor(char str[], int color) {
+void printColor(const char * str, int color) {
   switch (color) {
     case RED: printf("\x1b[31m"); printf("%s",str); printf("\033[0m"); break;
     case GREEN: printf("\x1b[32m"); printf("%s",str); printf("\033[0m"); break;
@@ -57,3 +58,11 @@ int getch() {
   tcsetattr( STDIN_FILENO, TCSANOW, &oldt );
   return ch;
 }
+
+void printUpper(char * s) {
+  int i;
+  for (i = 0; i < strlen(s); ++i) {
+    printf("%c", toupper(s[i]));
+  }
+}
+

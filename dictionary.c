@@ -5,13 +5,16 @@
 #include "dictionary.h"
 #include "UI.h"
 
+
+
+
 void createDictionary(BTA *dict, char * notify) {
 
     printf("\nCreating Dictionary...");
 
     int WordCount = 0;
 
-    dict = btcrt("BTree_dict.dat", 0, 0);
+    //dict = btcrt("BTree_dict.dat", 0, 0);
 
     char *filename="EV_text_dict.txt";
     wchar_t * tmp_word; // widechar word
@@ -68,24 +71,33 @@ void createDictionary(BTA *dict, char * notify) {
                 wcstombs(word, tmp_word, WORD_MAX_LEN*sizeof(char));
                 wcstombs(meaning, tmp_meaning, MEAN_MAX_LEN*sizeof(char));
                 
-                dictInsertWord(dict, word, meaning);
+                printf("WORD: '%s'\n%s\n", word, meaning);
+
+                dictAddWord(dict, word, meaning);
+
+                if (strcmp(word, "hello") == 0) {
+                    getch();
+                }
                 
                 WordCount++;
             }
 
     }
     fclose(f);
-    getch();
     sprintf(notify, "Loading done. %d words was loaded.", WordCount);
+
+    getch();
 
 }
 
 
-int dictFindWord(BTA *dict, char * word, char * meaning) {
+int dictFindWord(BTA * dict, char * word, char * meaning) {
+    //strLower(word, word);
     int meaningLength;
     return btsel(dict, word, meaning, MEAN_MAX_LEN, &meaningLength);
 }
 
-int dictInsertWord(BTA *dict, char *word, char * meaning) {
+int dictAddWord(BTA * dict, char * word, char * meaning) {
+    //strLower(word, word);
     return btins(dict, word, meaning, MEAN_MAX_LEN*sizeof(char));
 }
