@@ -1,6 +1,6 @@
 #include <string.h>
 #include <ctype.h>
-#include "extio.h"
+
 
 char * strLower(char * dest, char * s) {
   int i;
@@ -19,3 +19,14 @@ char * strUpper(char * dest, char * s) {
   dest[strlen(s)] = '\0';
   return dest;
 }
+
+
+void trim(char * s) {
+    char * p = s;
+    int l = strlen(p);
+
+    while(isspace(p[l - 1])) p[--l] = 0;
+    while(* p && isspace(* p)) ++p, --l;
+
+    memmove(s, p, l + 1);
+}   

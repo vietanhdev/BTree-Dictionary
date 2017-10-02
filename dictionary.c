@@ -47,14 +47,15 @@ void createDictionary(BTA *dict, char * notify) {
             } while(linePtr != NULL && line[0] != L'@');
 
             while(linePtr != NULL) {
+
                 // Empty word and meaning strings
                 memset(tmp_word,0,sizeof(tmp_word[0]));
                 memset(tmp_meaning,0,sizeof(tmp_meaning[0]));
 
                 // Split word
-                for (i = 1; iswalpha(line[i]); i++);
+                for (i = 1; line[i] != L'/' && line[i] != L'\n'; i++);
                 wcsncpy(tmp_word, &line[1], i-1);
-                tmp_word[i-1] = '\0';
+                tmp_word[i-1] = L'\0';
 
                 // Split meaning
                 wcsncpy(tmp_meaning, &line[i], wcslen(line) - i + 1);
@@ -103,11 +104,8 @@ int dictAddWord(BTA * dict, char * word, char * meaning) {
     char old_meaning[MEAN_MAX_LEN];
     int find;
 
-    int return_value; // return value of this function
-
     // do not add word if word string is empty
     if (strlen(word) <= 0) {
-        printf("Stringlen<=0\n"); getch();
         return 1;
     }
 
@@ -118,9 +116,9 @@ int dictAddWord(BTA * dict, char * word, char * meaning) {
     }
 
     strLower(wordLower, word);
-    
-    return_value = btins(dict, wordLower, meaning, MEAN_MAX_LEN*sizeof(char));
-    //printf("%d\n", return_value); getch();
+    trim(wordLower);
 
-    return return_value;
+    //printf("'%s'>'%s'\n", word, wordLower);
+
+    return btins(dict, wordLower, meaning, MEAN_MAX_LEN*sizeof(char));
 }
