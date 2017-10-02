@@ -22,7 +22,7 @@ void quit() {
 }
 
 void searchBuff_add(char c) {
-    if (isalpha(c) || isdigit(c)) {
+    if (isprint(c)) {
         sprintf(searchBox, "%s%c", searchBox, c);
     }
 }
