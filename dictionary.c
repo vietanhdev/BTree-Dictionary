@@ -85,6 +85,8 @@ void createDictionary(BTA *dict, char * notify) {
     fclose(f);
     sprintf(notify, "Loading done. %d words was loaded.", WordCount);
 
+    //getch();
+
     // Save the dictionary by re-opening
     printf("\nSaving file...\n");
     btcls(dict);
@@ -119,6 +121,7 @@ int dictAddWord(BTA * dict, char * word, char * meaning) {
     trim(wordLower);
 
     //printf("'%s'>'%s'\n", word, wordLower);
+    //printf("%s\n", meaning);
 
     return btins(dict, wordLower, meaning, MEAN_MAX_LEN*sizeof(char));
 }
