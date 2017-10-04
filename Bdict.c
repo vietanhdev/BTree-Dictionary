@@ -1,3 +1,4 @@
+#include <locale.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -49,12 +50,32 @@ void searchBuff_search() {
     }
 }
 
+void printAllWords(BTA * dict) {
+    int rsize;
+
+    char word[WORD_MAX_LEN];
+    char meaning[MEAN_MAX_LEN];
+
+    btpos(dict, ZSTART);
+    while(btseln(dict, word, meaning, MEAN_MAX_LEN, &rsize) == 0) {
+        printf("%s\t%s\n",  word, meaning);   
+    }
+    getch();
+}
+
 
 int main(int argc, char const *argv[])
 {
 
+
+    char *locale;
+
+    locale = setlocale(LC_ALL, "");
+
     btinit();
     dict = btopn("BTree_dict.dat", 0, FALSE);
+
+    //printAllWords(dict);
 
     char c;
     while (1) {

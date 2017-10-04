@@ -1,23 +1,47 @@
-# Declaration of variables
-CC = gcc
-CC_FLAGS = -Wall -g
- 
-# File names
-EXEC = Bdict
-SOURCES = $(wildcard *.c)
-OBJECTS = $(SOURCES:.c=.o)
+# Exe. file name
+TARGET = run
 
-# LIBS
-LIBS = -Lbt/lib -lbt -Ibt/inc
- 
-# Main target
-$(EXEC): $(OBJECTS)
-	$(CC) $(OBJECTS) -o $(EXEC) ${LIBS}
- 
-# To obtain object files
-%.o: %.c
-	$(CC) -c $(CC_FLAGS) $< -o $@ ${LIBS}
- 
-# To remove generated files
+CC=gcc
+# compiling flags here
+CFLAGS= -g -Wall
+
+IDIR = libs/btree/inc 
+# define any directories containing header file other then /usr/include
+INCLUDES = -I $(IDIR)
+
+# define any libraries to link into executable:
+# if I want to link in libraries
+# (libx.so or libx.a) I use the -llibname (-lx -lx) = (-lx)
+# libfdr => -lfdr
+LIBS = -lbt
+# LIBS = -lm
+
+# define any directories containing implementation of the file in INCLUDES
+# ../..lib means up 2 level then search for /lib
+LDIR = libs/btree/lib
+LFLAGS = -L $(LDIR)
+
+# This uses Suffix Replacement within a macro:
+#   $(name:string1=string2)
+# For each word in 'name' replace 'string1' with 'string2'
+# Below we are replacing the suffix .c of all words in the macro SRCS
+# with the .o suffix
+
+SRCS = $(wildcard *.c)
+ODIR = obj
+_OBJS = $(SRCS:.c=.o)
+OBJS = $(patsubst %,$(ODIR)/%,$(_OBJS))
+
+
+
+$(TARGET): $(OBJS)
+	$(CC) $(CFLAGS) $(INCLUDES) -g -o $@ $^ $(LFLAGS) $(LIBS)
+	@echo "Linking complete!"
+
+$(ODIR)/%.o: %.c $(DEPS)
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+	@echo "Compiled "$<" successfully!"
+
 clean:
-	rm -f $(EXEC) $(OBJECTS)
+	rm -f $(ODIR)/*.o *~ $(TARGET)
+	@echo "Cleanup complete!"
