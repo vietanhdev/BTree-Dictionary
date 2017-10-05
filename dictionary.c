@@ -78,6 +78,10 @@ void createDictionary(BTA *dict, char * notify) {
                 // Read a line in dict file
                 linePtr = fgetws(line, LINE_WC_MAX_LEN, f);
                 while (linePtr != NULL && line[0] != L'@') {
+                    if (wcslen(tmp_meaning) + wcslen(line) > MEAN_MAX_LEN) {
+                        printf("Meaning exceeded the max length. Word: %S\n", tmp_word);
+                        exit(1);
+                    }
                     wcscat(tmp_meaning, line);
                     // Read a line in dict file
                     linePtr = fgetws(line, LINE_WC_MAX_LEN, f);
@@ -105,8 +109,8 @@ void createDictionary(BTA *dict, char * notify) {
     //printf("%p - %p - %p - %p\n", tmp_word, tmp_meaning, word, meaning); getch();
 
     //free used memory
-    // free(word); free(meaning);
-    // free(tmp_word); free(tmp_meaning);
+    free(word); free(meaning);
+    free(tmp_word); free(tmp_meaning);
 
     // Save the dictionary by re-opening
     printf("\nSaving file...\n");
