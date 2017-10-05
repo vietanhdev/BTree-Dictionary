@@ -79,7 +79,7 @@ void createDictionary(BTA *dict, char * notify) {
                 linePtr = fgetws(line, LINE_WC_MAX_LEN, f);
                 while (linePtr != NULL && line[0] != L'@') {
                     if (wcslen(tmp_meaning) + wcslen(line) > MEAN_MAX_LEN) {
-                        printf("Meaning exceeded the max length. Word: %S\n", tmp_word);
+                        printf("Meaning exceeded the maximum length. Word: %S\n", tmp_word);
                         exit(1);
                     }
                     wcscat(tmp_meaning, line);
@@ -97,7 +97,7 @@ void createDictionary(BTA *dict, char * notify) {
 
                 // print realtime info
                 WordCount++;
-                printf("> %d words. %s\n", WordCount, word);
+                printf("\r> %d words. %s\n", WordCount, word);
                 
             }
 
