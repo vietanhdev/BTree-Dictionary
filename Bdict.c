@@ -22,15 +22,23 @@ void quit() {
     btcls(dict);
 }
 
+
+void searchBuff_Suggest() {
+    wordListSuggest(suggestBox, searchBox, dictWordList, dictWordListSize);
+}
+
 void searchBuff_add(char c) {
     if (isprint(c)) {
         sprintf(searchBox, "%s%c", searchBox, c);
+        searchBuff_Suggest();
     }
 }
 
 void searchBuff_backspace() {
-    if (strlen(searchBox) > 0)
+    if (strlen(searchBox) > 0) {
         searchBox[strlen(searchBox)-1] = '\0';
+        searchBuff_Suggest();
+    } 
 }
 
 void searchBuff_search() {
@@ -77,6 +85,7 @@ int main(int argc, char const *argv[])
     printf("Loading data ...\n");
     btinit();
     dict = btopn("BTree_dict.dat", 0, FALSE);
+    if (dict != NULL) makeWordList(dict, &dictWordList, &dictWordListSize);
 
     //printAllWords(dict);
 

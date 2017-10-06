@@ -7,6 +7,7 @@
 
 
 char searchBox[WORD_MAX_LEN] = "";
+char suggestBox[SUGGEST_BOX_MAX_LEN] = "";
 char notify1[NOTIFY_MAX_LEN] = "";
 char notify2[NOTIFY_MAX_LEN] = "";
 char meaningArea[MEAN_MAX_LEN] = "";
@@ -57,6 +58,7 @@ void UI_Menu(BTA * dict) {
 
 void UI_Search(char * searchBox) {
     printf("\n>> Search: "); printf("%s", searchBox);
+    printf("\n\x1b[33m%s\033[0m\n", suggestBox);
     gotoxy(12 + strlen(searchBox), 10);
 }
 
@@ -85,6 +87,7 @@ void UI_Dict_AddWord(BTA * dict) {
     printf("Word: "); readLn(stdin, word, WORD_MAX_LEN);
     printf("Meaning:\n"); readLn(stdin, meaning, MEAN_MAX_LEN);
     dictAddWord(dict, word, meaning);
+    wordListAddWord(word, &dictWordList, &dictWordListSize);
     sprintf(notify1, "Added a word: '%s'", word);
 }
 
@@ -97,9 +100,11 @@ void UI_Dict_DeleteWord(BTA * dict) {
     BTint value = 0;
     if (bfndky(dict, word, &value) != QNOKEY) { // found the word
         bdelky(dict, word);
+        wordListRemoveWord(word, &dictWordList, &dictWordListSize);
         sprintf(notify1, "Deleted a word: '%s'", word);
     } else {
         sprintf(notify1, "Cannot find this word to delete: '%s'", word);
     }
+
 }
 

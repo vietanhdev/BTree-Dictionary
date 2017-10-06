@@ -10,6 +10,7 @@
 
 
 extern char searchBox[WORD_MAX_LEN];
+extern char suggestBox[SUGGEST_BOX_MAX_LEN];
 extern char notify1[NOTIFY_MAX_LEN];
 extern char notify2[NOTIFY_MAX_LEN];
 extern char meaningArea[MEAN_MAX_LEN];
