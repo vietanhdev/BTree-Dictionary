@@ -72,6 +72,9 @@ int main(int argc, char const *argv[])
 
     locale = setlocale(LC_ALL, "");
 
+
+    // Load the dictionary
+    printf("Loading data ...\n");
     btinit();
     dict = btopn("BTree_dict.dat", 0, FALSE);
 

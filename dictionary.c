@@ -97,7 +97,7 @@ void createDictionary(BTA *dict, char * notify) {
 
                 // print realtime info
                 WordCount++;
-                printf("\r> %d words. %s\n", WordCount, word);
+                printf("\r> %d words. %s", WordCount, word);
                 
             }
 
@@ -114,8 +114,8 @@ void createDictionary(BTA *dict, char * notify) {
 
     // Save the dictionary by re-opening
     printf("\nSaving file...\n");
-    btcls(dict);
-    dict = btopn("BTree_dict.dat", 0, FALSE);
+    // btcls(dict);
+    // dict = btopn("BTree_dict.dat", 0, FALSE);
 
 
 }
