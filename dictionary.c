@@ -228,7 +228,7 @@ void createDictionary(BTA *dict, char * notify) {
 
                 // print realtime info
                 WordCount++;
-                printf("\r> %d words. %s", WordCount, word);
+                printf("\33[2K\r> %d words. %s", WordCount, word);
                 
             }
 
