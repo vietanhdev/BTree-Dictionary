@@ -86,6 +86,7 @@ int main(int argc, char const *argv[])
     btinit();
     dict = btopn("BTree_dict.dat", 0, FALSE);
     if (dict != NULL) makeWordList(dict, &dictWordList, &dictWordListSize);
+    //printAllWords(dict);
 
     //printAllWords(dict);
 
