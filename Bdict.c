@@ -1,4 +1,6 @@
 #include <locale.h>
+#include <gtk/gtk.h>
+
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,14 +14,21 @@
 #include "UI.h"
 
 
+GtkBuilder      *builder; 
+GtkWidget       *main_window;
+
+GtkEntry *lookupEntry;
+GtkTextView *meaningView;
+GtkTextBuffer  *meaningViewBuff;
+
+
 BTA *dict;
 
-
 void quit() {
-    clear();
-    UI_InfoBoard();
-    printf("Goodbye! See you later...\n");
+    // clear();
+    // UI_InfoBoard();
     btcls(dict);
+    exit(0);
 }
 
 
@@ -77,36 +86,61 @@ int main(int argc, char const *argv[])
 
 
     char *locale;
-
     locale = setlocale(LC_ALL, "");
-
 
     // Load the dictionary
     printf("Loading data ...\n");
     btinit();
     dict = btopn("BTree_dict.dat", 0, FALSE);
     if (dict != NULL) makeWordList(dict, &dictWordList, &dictWordListSize);
-    //printAllWords(dict);
 
-    //printAllWords(dict);
+    char notify[100];
+    if (dict == NULL) createDictionary(&dict, notify);
 
-    char c;
-    while (1) {
-        UI_InfoBoard();
-        UI_Notify();
-        UI_Search(searchBox);
 
-        c = getch();
-        
-        switch(c) {
-            case 27: quit(); return 0; // ESC to exit
-            case 93: UI_Menu(dict); break; // ] for menu
-            case '\n': searchBuff_search(); break; // Enter to search
-            case 127: searchBuff_backspace(); break; // Backspace
-            default: searchBuff_add(c);
 
-        }
+    gtk_init(&argc, &argv);
 
-    }
+    meaningViewBuff = gtk_text_buffer_new(NULL);    
+ 
+    builder = gtk_builder_new();
+    gtk_builder_add_from_file (builder, "GUI/main.glade", NULL);
+ 
+    main_window = GTK_WIDGET(gtk_builder_get_object(builder, "main-window"));
+    gtk_builder_connect_signals(builder, NULL);
+ 
+
+    lookupEntry = GTK_ENTRY(gtk_builder_get_object(builder, "lookup-entry"));
+    meaningView = GTK_TEXT_VIEW(gtk_builder_get_object(builder, "meaning-view"));
+    gtk_text_view_set_buffer (meaningView, meaningViewBuff);
+    gtk_text_buffer_set_text(meaningViewBuff, "meaning", -1);
+
+
+    g_object_unref(builder);
+ 
+    gtk_widget_show(main_window);                
+    gtk_main();
+
+
     return 0;
+}
+
+
+void on_lookup_entry_activate() {
+    const gchar * searchEntryText = gtk_entry_buffer_get_text (gtk_entry_get_buffer (lookupEntry));
+
+    char meaning[MEAN_MAX_LEN];
+    int searchResult = dictFindWord(dict, searchEntryText, meaning);
+    if (searchResult != 0) {
+        gtk_text_buffer_set_text(meaningViewBuff, "Not found!", -1);
+    } else {
+        gtk_text_buffer_set_text(meaningViewBuff, meaning, -1);
+    }
+}
+
+// called when window is closed
+void on_window_main_destroy()
+{
+    gtk_main_quit();
+    quit();
 }

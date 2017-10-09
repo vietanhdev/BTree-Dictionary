@@ -47,7 +47,7 @@ void UI_Menu(BTA * dict) {
         switch(c) {
             case 'a': UI_Dict_AddWord(dict); return;
             case 'd': UI_Dict_DeleteWord(dict); return;
-            case 'l': createDictionary(dict, notify1); return;
+            //case 'l': createDictionary(dict, notify1); return;
             case 'x': return;
             default: strcpy(menuNotify, "Invalid selection!");
         }

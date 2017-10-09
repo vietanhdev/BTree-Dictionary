@@ -138,16 +138,16 @@ void makeWordList(BTA * dict, char *** wordList, int * wordListSize) {
 
 
 // This function create a BTree dictionary from a txt file
-void createDictionary(BTA *dict, char * notify) {
+void createDictionary(BTA ** dict, char * notify) {
 
     printf("\nCreating Dictionary..."); fflush(stdout);
 
     int WordCount = 0; // count the number of words in dictionary
 
-    btcls(dict); // close if a dictionary file was opened. 
+    btcls(*dict); // close if a dictionary file was opened. 
     // below line is required for operating correctly.
 
-    dict = btcrt("BTree_dict.dat", 0, FALSE);
+    *dict = btcrt("BTree_dict.dat", 0, FALSE);
 
     char *filename="EV_text_dict.txt";
     wchar_t * tmp_word; // widechar word
@@ -224,7 +224,7 @@ void createDictionary(BTA *dict, char * notify) {
                 wcstombs(meaning, tmp_meaning, MEAN_MAX_LEN*sizeof(char));
 
 
-                dictAddWord(dict, word, meaning);
+                dictAddWord(*dict, word, meaning);
 
                 // print realtime info
                 WordCount++;
@@ -250,7 +250,7 @@ void createDictionary(BTA *dict, char * notify) {
 
 
     printf("Making word list...\n");
-    makeWordList(dict, &dictWordList, &dictWordListSize);
+    makeWordList(*dict, &dictWordList, &dictWordListSize);
 
 }
 

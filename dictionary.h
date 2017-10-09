@@ -18,7 +18,7 @@
 extern char ** dictWordList;
 extern int dictWordListSize;
 
-void createDictionary(BTA *dict, char * notify);
+void createDictionary(BTA ** dict, char * notify);
 int dictFindWord(BTA *dict, char * word, char * meaning);
 int dictAddWord(BTA *dict, char * word, char * meaning);
 char *rand_string(char *str, size_t size);

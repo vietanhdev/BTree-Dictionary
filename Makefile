@@ -5,7 +5,7 @@ CC=gcc
 # compiling flags here
 CFLAGS= -g -Wall
 
-IDIR = libs/btree/inc 
+IDIR = libs/btree/inc
 # define any directories containing header file other then /usr/include
 INCLUDES = -I $(IDIR)
 
@@ -21,6 +21,8 @@ LIBS = -lbt
 LDIR = libs/btree/lib
 LFLAGS = -L $(LDIR)
 
+GTKFLAGS= -export-dynamic `pkg-config --cflags --libs gtk+-3.0`
+
 # This uses Suffix Replacement within a macro:
 #   $(name:string1=string2)
 # For each word in 'name' replace 'string1' with 'string2'
@@ -35,13 +37,13 @@ OBJS = $(patsubst %,$(ODIR)/%,$(_OBJS))
 
 
 $(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) $(INCLUDES) -g -o $@ $^ $(LFLAGS) $(LIBS)
+	$(CC)  $(CFLAGS) $(INCLUDES) -g -rdynamic -o $@ $^ $(LFLAGS) $(LIBS) $(GTKFLAGS)
 	@echo "Linking complete!"
 
 $(ODIR)/%.o: %.c $(DEPS)
-	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+	$(CC) $(CFLAG S) $(INCLUDES) -rdynamic -c $< -o $@ $(LFLAGS) $(LIBS) $(GTKFLAGS)
 	@echo "Compiled "$<" successfully!"
-
+ 
 clean:
 	rm -f $(ODIR)/*.o *~ $(TARGET)
 	@echo "Cleanup complete!"
