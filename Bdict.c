@@ -13,6 +13,8 @@
 #include "extio.h"
 #include "UI.h"
 
+#include "dialog.h"
+
 
 GtkBuilder      *builder; 
 GtkWidget       *main_window;
@@ -20,6 +22,9 @@ GtkWidget       *main_window;
 GtkEntry *lookupEntry;
 GtkTextView *meaningView;
 GtkTextBuffer  *meaningViewBuff;
+
+
+GtkDialog * loadDictPromptDialog;
 
 
 BTA *dict;
@@ -81,25 +86,25 @@ void printAllWords(BTA * dict) {
 }
 
 
+// When starting the dictionary, if a BTree database is not available, use will be prompt to create new database from text file.
+// This func. is responsible for process "Yes" button. 
+void loadDictPromptYes (GtkWidget *widget, gpointer data) {
+    gtk_widget_hide(GTK_WIDGET(loadDictPromptDialog));
+    createDictionary("EV_text_dict.txt", "BTree_dict.dat", &dict, meaningViewBuff);
+    makeWordList(dict, &dictWordList, &dictWordListSize);
+}
+// This func. is responsible for process "No" button.
+void loadDictPromptNo (GtkWidget *widget, gpointer data) {
+    gtk_widget_hide(GTK_WIDGET(loadDictPromptDialog));
+}
+
+
 int main(int argc, char const *argv[])
 {
-
-
     char *locale;
     locale = setlocale(LC_ALL, "");
 
-    // Load the dictionary
-    printf("Loading data ...\n");
-    btinit();
-    dict = btopn("BTree_dict.dat", 0, FALSE);
-    if (dict != NULL) makeWordList(dict, &dictWordList, &dictWordListSize);
-
-    char notify[100];
-    if (dict == NULL) createDictionary(&dict, notify);
-
-
-
-    gtk_init(&argc, &argv);
+    gtk_init(NULL, NULL);
 
     meaningViewBuff = gtk_text_buffer_new(NULL);    
  
@@ -108,20 +113,27 @@ int main(int argc, char const *argv[])
  
     main_window = GTK_WIDGET(gtk_builder_get_object(builder, "main-window"));
     gtk_builder_connect_signals(builder, NULL);
- 
+
 
     lookupEntry = GTK_ENTRY(gtk_builder_get_object(builder, "lookup-entry"));
     meaningView = GTK_TEXT_VIEW(gtk_builder_get_object(builder, "meaning-view"));
     gtk_text_view_set_buffer (meaningView, meaningViewBuff);
-    gtk_text_buffer_set_text(meaningViewBuff, "meaning", -1);
+    gtk_text_buffer_set_text(meaningViewBuff, "", -1);
 
+
+    // Load the dictionary
+    btinit();
+    dict = btopn("BTree_dict.dat", 0, FALSE);
+    if (dict == NULL) {
+        loadDictPromptDialog = GTK_DIALOG(gtk_builder_get_object(builder, "load-dict-prompt"));
+        gtk_widget_show(GTK_WIDGET(loadDictPromptDialog));
+    }
+
+    gtk_widget_show(main_window);
 
     g_object_unref(builder);
- 
-    gtk_widget_show(main_window);                
+    
     gtk_main();
-
-
     return 0;
 }
 

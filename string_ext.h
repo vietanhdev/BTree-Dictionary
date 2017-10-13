@@ -1,3 +1,3 @@
-char * strLower(char * dest, char * s);
-char * strUpper(char * dest, char * s);
+char * strLower(char * dest, const char * s);
+char * strUpper(char * dest, const char * s);
 void trim(char * s);

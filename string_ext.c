@@ -2,7 +2,7 @@
 #include <ctype.h>
 
 
-char * strLower(char * dest, char * s) {
+char * strLower(char * dest, const char * s) {
   int i;
   for (i = 0; i < strlen(s); i++) {
     dest[i] = tolower(s[i]);
@@ -11,7 +11,7 @@ char * strLower(char * dest, char * s) {
   return dest;
 }
 
-char * strUpper(char * dest, char * s) {
+char * strUpper(char * dest, const char * s) {
   int i;
   for (i = 0; i < strlen(s); i++) {
     dest[i] = toupper(s[i]);

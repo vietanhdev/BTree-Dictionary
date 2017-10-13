@@ -1,3 +1,5 @@
+#include <gtk/gtk.h>
+
 #define WORD_MAX_LEN 200
 #define MEAN_MAX_LEN 40000
 #define LINE_MAX_LEN 40000
@@ -9,6 +11,9 @@
 #define SUGGEST_BOX_MAX_LEN 10000
 #define SUGGEST_WORD_NUM 5
 
+#define DICTNAME_MAX_LEN 200
+#define DICTPATH_MAX_LEN 500
+
 #ifndef ZKYLEN
 #define ZKYLEN WORD_MAX_LEN
 #endif
@@ -18,14 +23,12 @@
 extern char ** dictWordList;
 extern int dictWordListSize;
 
-void createDictionary(BTA ** dict, char * notify);
-int dictFindWord(BTA *dict, char * word, char * meaning);
-int dictAddWord(BTA *dict, char * word, char * meaning);
-char *rand_string(char *str, size_t size);
-void createDictionaryRandom(BTA *dict);
+
+int dictFindWord(BTA *dict, const char * word, char * meaning);
+void createDictionary(const char * textFileName, const char * dictFileName, BTA ** dict, GtkTextBuffer  *notifyBuff);
 void makeWordList(BTA * dict, char *** wordList, int * wordListSize);
 void wordListAddWord(char * word, char *** wordList, int * wordListSize);
-void wordListRemoveWord(char * word, char *** wordList, int * wordListSize);
+//void wordListRemoveWord(char * word, char *** wordList, int * wordListSize);
 void wordListEmpty(char *** wordList, int * wordListSize);
 int wordListSuggest(char * suggestStr, char * str, char ** wordList, int wordListSize);
 int suggestWordCmp(char * str, char * word);

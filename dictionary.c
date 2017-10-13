@@ -6,11 +6,35 @@
 #include "UI.h"
 #include "string_ext.h"
 
+// typedef struct dict_s {
+//    BTA * dict;
+//    char dictName[DICTNAME_MAX_LEN];
+//    char dictPath[50];
+//    char ** wordList;
+//    int wordListSize;
+// } dict_t;
 
 char ** dictWordList;
 int dictWordListSize;
-
- 
+//dict_t** dictData[10];
+// This function search from the struct to get the dictionary that user wants, then initialized the dictionary by changing all the neccessary data to default then ready to be used : root, dictWordList, dictWordListSize, and so on....
+// void changeRootAccess(BTA** current, dict_t * data,char * dictName,char ** wordList,int *wordListSize){
+//     int i=0;
+//     dict_t *temp=(dict*)malloc(sizeof(dict_t));
+//     if(*current!=NULL){
+//             btcls(current);
+//     } else{
+//             for(i=0;i<data->numOfDict;i++){
+//                     if(strcmp(dictName,data[i].dictName)==0){
+//                             temp=data[i];
+//                             break;}
+//                     else printf("No matching dictionary!\n");
+//                     }
+//                     *current=btopn(temp->dictPath);
+//     *dictWordList=*(temp->dictWordList);
+//     *wordListSize=temp->wordListSize;}
+//     return;
+// }
 
 // To determin if str is prefix of word
 // return 1: is prefix; 0: not prefix; 2: str=word
@@ -60,9 +84,9 @@ void wordListEmpty(char *** wordList, int * wordListSize) {
     int i;
     // Free previous wordList
     if (*wordListSize > 0) {
-        for (i = 0; i < *wordListSize; i++) {
-            free(*(wordList[i]));
-        }
+            //for (i = 0; i <= *wordListSize; i++) {
+            free(**wordList);
+            //}
         free(*wordList);
     }
     *wordListSize = 0;
@@ -78,8 +102,7 @@ void wordListEmpty(char *** wordList, int * wordListSize) {
 void wordListAddWord(char * word, char *** wordList, int * wordListSize) {
     int id = *wordListSize; // index of next word
 
-    // printf("%p\n", wordList);
-    if ((*wordList = realloc(*wordList, ((*wordListSize) + 1) * sizeof(char *))) == NULL) {
+    if ((*wordList = realloc(*wordList, ((*wordListSize) + 1) * sizeof(**wordList))) == NULL) {
         printf("Cannot allocate memory.\n");
         exit(1);
     };
@@ -90,34 +113,13 @@ void wordListAddWord(char * word, char *** wordList, int * wordListSize) {
         exit(1);
     }
 
-
     strncpy((*wordList)[id], word, strlen(word));
     // // force a terminal character
     (*wordList)[id][strlen(word)] = '\0';
 
     *wordListSize = id+1;
-
-
 }
 
-void wordListRemoveWord(char * word, char *** wordList, int * wordListSize) {
-    int i, j;
-    for (i = 0; i < *wordListSize; i++) {
-        if (strcmp(*wordList[i], word) == 0) {
-            free(*wordList[i]);
-            for (j = i+1; j < *wordListSize; j++) {
-                *wordList[j-1] = *wordList[j];
-            }
-            *wordList[*wordListSize - 1] = NULL;
-            *wordListSize -= 1;
-            if (NULL == (*wordList=realloc(*wordList, (*wordListSize) * sizeof(char)))){
-                printf("Wrong thing happen with realloc. wordListRemoveWord()\n");
-                exit(1);
-            };
-            return;
-        }
-    }
-}
 
 // This function create a word list to use in autocomplete and autocorrection function
 void makeWordList(BTA * dict, char *** wordList, int * wordListSize) {
@@ -136,24 +138,24 @@ void makeWordList(BTA * dict, char *** wordList, int * wordListSize) {
 }
 
 
-
 // This function create a BTree dictionary from a txt file
-void createDictionary(BTA ** dict, char * notify) {
+void createDictionary(const char * textFileName, const char * dictFileName, BTA ** dict, GtkTextBuffer  *notifyBuff) {
 
-    printf("\nCreating Dictionary..."); fflush(stdout);
+    gtk_text_buffer_set_text (notifyBuff, "Loading dictionary...\n", -1);
 
     int WordCount = 0; // count the number of words in dictionary
 
     btcls(*dict); // close if a dictionary file was opened. 
     // below line is required for operating correctly.
 
-    *dict = btcrt("BTree_dict.dat", 0, FALSE);
+    *dict = btcrt(dictFileName, 0, FALSE);
 
-    char *filename="EV_text_dict.txt";
     wchar_t * tmp_word; // widechar word
     wchar_t * tmp_meaning; // widechar meaning
     wchar_t * line;
     wchar_t * linePtr;
+
+    char notify[MEAN_MAX_LEN];
 
     char * word;
     char * meaning;
@@ -171,12 +173,10 @@ void createDictionary(BTA ** dict, char * notify) {
 
     int i;
     FILE *f;
-    if((f=fopen(filename,"r"))==NULL){
-    		strcpy(notify, "File open failed");
+    if((f=fopen(textFileName,"r"))==NULL){
+            gtk_text_buffer_insert_at_cursor (notifyBuff, "File open failed!\n", -1);
             return;
     } else {
-
-            printf("Loading...\n");
 
             // Find the first word
             do {
@@ -210,7 +210,8 @@ void createDictionary(BTA ** dict, char * notify) {
                 linePtr = fgetws(line, LINE_WC_MAX_LEN, f);
                 while (linePtr != NULL && line[0] != L'@') {
                     if (wcslen(tmp_meaning) + wcslen(line) > MEAN_MAX_LEN) {
-                        printf("Meaning exceeded the maximum length. Word: %S\n", tmp_word);
+                        sprintf(notify, "Meaning exceeded the maximum length. Word: %S\n", tmp_word);
+                        gtk_text_buffer_insert_at_cursor (notifyBuff, notify, -1);
                         exit(1);
                     }
                     wcscat(tmp_meaning, line);
@@ -224,11 +225,12 @@ void createDictionary(BTA ** dict, char * notify) {
                 wcstombs(meaning, tmp_meaning, MEAN_MAX_LEN*sizeof(char));
 
 
-                dictAddWord(*dict, word, meaning);
+                dictAddWord(*dict, word, meaning, notifyBuff);
 
                 // print realtime info
                 WordCount++;
-                printf("\33[2K\r> %d words. %s", WordCount, word);
+                // sprintf(notify, "\33[2K\r> %d words. %s\0", WordCount, word);
+                // gtk_text_buffer_insert_at_cursor (notifyBuff, notify, -1);
                 
             }
 
@@ -236,73 +238,29 @@ void createDictionary(BTA ** dict, char * notify) {
     fclose(f);
 
     sprintf(notify, "Loading done. %d words was loaded.", WordCount);
+    gtk_text_buffer_insert_at_cursor (notifyBuff, notify, strlen(notify));
 
-    //printf("%p - %p - %p - %p\n", tmp_word, tmp_meaning, word, meaning); getch();
 
     //free used memory
     free(word); free(meaning);
     free(tmp_word); free(tmp_meaning);
 
     // Save the dictionary by re-opening
-    printf("\nSaving file...\n");
-    // btcls(dict);
-    // dict = btopn("BTree_dict.dat", 0, FALSE);
+    sprintf(notify, "\nSaving file...\n");
+    gtk_text_buffer_insert_at_cursor (notifyBuff, notify, -1);
+    btcls(*dict);
+    *dict = btopn(dictFileName, 0, FALSE);
 
 
-    printf("Making word list...\n");
+    sprintf(notify, "Making word list...\n");
+    gtk_text_buffer_insert_at_cursor (notifyBuff, notify, strlen(notify));
     makeWordList(*dict, &dictWordList, &dictWordListSize);
 
-}
-
-char *rand_string(char *str, size_t size) {
-    size_t n;
-    int key;
-    const char charset[] = "abcdefghijkwxyzABC342390DEFGHIJK";
-    if (size) {
-        --size;
-        for (n = 0; n < size; n++) {
-            key = rand() % (int) (sizeof charset - 1);
-            str[n] = charset[key];
-        }
-        str[size] = '\0';
-    }
-    return str;
-}
-
-void createDictionaryRandom(BTA *dict) {
-
-    char * word;
-
-    printf("\nCreating Dictionary..."); fflush(stdout);
-
-    word = malloc(WORD_MAX_LEN * sizeof(char));
-    
-
-    btcls(dict); // close if a dictionary file was opened. 
-    // below line is required for operating correctly.
-
-    dict = btcrt("BTree_dict.dat", 0, FALSE);
-
-    int i;
-    for (i = 1; i < 200000; i++) {
-        rand_string(word, 10);
-        printf("%d\n", i);
-        dictAddWord(dict, word, "skdansdjasndj");
-    }
-
-   
-    // Save the dictionary by re-opening
-    printf("\nSaving file...\n");
-    btcls(dict);
-    dict = btopn("BTree_dict.dat", 0, FALSE);
-
-    printf("Done!\n");
-    getch();
-
+    gtk_text_buffer_insert_at_cursor (notifyBuff, "Loading done. Use lookup entry to lookup words.", -1);
 }
 
 
-int dictFindWord(BTA * dict, char * word, char * meaning) {
+int dictFindWord(BTA * dict, const char * word, char * meaning) {
     int return_value;
     int meaningLength;
     char * wordLower;
@@ -321,7 +279,7 @@ int dictFindWord(BTA * dict, char * word, char * meaning) {
     return return_value;
 }
 
-int dictAddMeaning(BTA * dict, char * word, char * new_meaning) {
+int dictAddMeaning(BTA * dict, char * word, char * new_meaning, GtkTextBuffer  *notifyBuff) {
 
     int meaningLength;
     char * meaning;
@@ -340,7 +298,9 @@ int dictAddMeaning(BTA * dict, char * word, char * new_meaning) {
     meaningLength += strlen(new_meaning); // meaning length = old meaning length + new meaning length
     
     if (strlen(meaning) + strlen(new_meaning) > MEAN_MAX_LEN) {
-        printf("Cannot load word '%s' - Exceed maximum meaning length.\n", word);
+        gtk_text_buffer_insert_at_cursor (notifyBuff, "Cannot load word - Exceed maximum meaning length:  ", -1);
+        gtk_text_buffer_insert_at_cursor (notifyBuff, word, strlen(word));
+        gtk_text_buffer_insert_at_cursor (notifyBuff, "\n", -1);
         return -1;
     }
 
@@ -351,7 +311,7 @@ int dictAddMeaning(BTA * dict, char * word, char * new_meaning) {
     return return_value;
 }
 
-int dictAddWord(BTA * dict, char * word, char * meaning) {
+int dictAddWord(BTA * dict, char * word, char * meaning, GtkTextBuffer  *notifyBuff) {
 
     // standarlize word to use as key
     strLower(word, word);
@@ -371,7 +331,7 @@ int dictAddWord(BTA * dict, char * word, char * meaning) {
     find = bfndky(dict, word, &value);
 
     if (find == 0) {
-        return_value = dictAddMeaning(dict, word, meaning);
+        return_value = dictAddMeaning(dict, word, meaning, notifyBuff);
     } else {
         return_value = btins(dict, word, meaning, strlen(meaning)*sizeof(char));
     }

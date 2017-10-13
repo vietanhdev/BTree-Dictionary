@@ -86,7 +86,7 @@ void UI_Dict_AddWord(BTA * dict) {
     printf("\n*** ADD A WORD:\n");
     printf("Word: "); readLn(stdin, word, WORD_MAX_LEN);
     printf("Meaning:\n"); readLn(stdin, meaning, MEAN_MAX_LEN);
-    dictAddWord(dict, word, meaning);
+    //dictAddWord(dict, word, meaning);
     wordListAddWord(word, &dictWordList, &dictWordListSize);
     sprintf(notify1, "Added a word: '%s'", word);
 }
@@ -99,12 +99,13 @@ void UI_Dict_DeleteWord(BTA * dict) {
 
     BTint value = 0;
     if (bfndky(dict, word, &value) != QNOKEY) { // found the word
-        bdelky(dict, word);
-        wordListRemoveWord(word, &dictWordList, &dictWordListSize);
+        btdel(dict, word);
+        wordListEmpty(&dictWordList, &dictWordListSize);
+                // wordListRemoveWord(word, &dictWordList, &dictWordListSize);
+                makeWordList(dict, &dictWordList, &dictWordListSize);
         sprintf(notify1, "Deleted a word: '%s'", word);
     } else {
         sprintf(notify1, "Cannot find this word to delete: '%s'", word);
     }
 
 }
-
