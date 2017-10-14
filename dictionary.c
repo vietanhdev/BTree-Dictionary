@@ -6,35 +6,10 @@
 #include "UI.h"
 #include "string_ext.h"
 
-// typedef struct dict_s {
-//    BTA * dict;
-//    char dictName[DICTNAME_MAX_LEN];
-//    char dictPath[50];
-//    char ** wordList;
-//    int wordListSize;
-// } dict_t;
 
 char ** dictWordList;
 int dictWordListSize;
-//dict_t** dictData[10];
-// This function search from the struct to get the dictionary that user wants, then initialized the dictionary by changing all the neccessary data to default then ready to be used : root, dictWordList, dictWordListSize, and so on....
-// void changeRootAccess(BTA** current, dict_t * data,char * dictName,char ** wordList,int *wordListSize){
-//     int i=0;
-//     dict_t *temp=(dict*)malloc(sizeof(dict_t));
-//     if(*current!=NULL){
-//             btcls(current);
-//     } else{
-//             for(i=0;i<data->numOfDict;i++){
-//                     if(strcmp(dictName,data[i].dictName)==0){
-//                             temp=data[i];
-//                             break;}
-//                     else printf("No matching dictionary!\n");
-//                     }
-//                     *current=btopn(temp->dictPath);
-//     *dictWordList=*(temp->dictWordList);
-//     *wordListSize=temp->wordListSize;}
-//     return;
-// }
+
 
 // To determin if str is prefix of word
 // return 1: is prefix; 0: not prefix; 2: str=word
@@ -139,7 +114,7 @@ void makeWordList(BTA * dict, char *** wordList, int * wordListSize) {
 
 
 // This function create a BTree dictionary from a txt file
-void createDictionary(const char * textFileName, const char * dictFileName, BTA ** dict, GtkTextBuffer  *notifyBuff) {
+void createDictionaryDBFromText(const char * textFileName, const char * dictFileName, BTA ** dict, GtkTextBuffer  *notifyBuff) {
 
     gtk_text_buffer_set_text (notifyBuff, "Loading dictionary...\n", -1);
 
@@ -278,6 +253,34 @@ int dictFindWord(BTA * dict, const char * word, char * meaning) {
 
     return return_value;
 }
+
+int dictFindNextWord(BTA * dict, char * currentWord, char * meaning) {
+    int return_value;
+    int meaningLength;
+
+    BTint value;
+
+    bfndky(dict, currentWord, &value);
+
+    return_value =  btseln(dict, currentWord, meaning, MEAN_MAX_LEN, &meaningLength);
+
+    return return_value;
+}
+
+
+int dictFindPrevWord(BTA * dict, char * currentWord, char * meaning) {
+    int return_value;
+    int meaningLength;
+
+    BTint value;
+
+    bfndky(dict, currentWord, &value);
+
+    return_value =  btselp(dict, currentWord, meaning, MEAN_MAX_LEN, &meaningLength);
+
+    return return_value;
+}
+
 
 int dictAddMeaning(BTA * dict, char * word, char * new_meaning, GtkTextBuffer  *notifyBuff) {
 

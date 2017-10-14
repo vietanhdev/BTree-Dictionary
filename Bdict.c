@@ -16,6 +16,8 @@
 #include "dialog.h"
 
 
+// GTK variables
+
 GtkBuilder      *builder; 
 GtkWidget       *main_window;
 
@@ -23,54 +25,19 @@ GtkEntry *lookupEntry;
 GtkTextView *meaningView;
 GtkTextBuffer  *meaningViewBuff;
 
-
 GtkDialog * loadDictPromptDialog;
 
 
+// BTree dictionary variables
+
 BTA *dict;
 
-void quit() {
-    // clear();
-    // UI_InfoBoard();
-    btcls(dict);
-    exit(0);
-}
+// current word showing on meaning box
+char currentWord[WORD_MAX_LEN];
 
 
-void searchBuff_Suggest() {
-    wordListSuggest(suggestBox, searchBox, dictWordList, dictWordListSize);
-}
+// Prototypes
 
-void searchBuff_add(char c) {
-    if (isprint(c)) {
-        sprintf(searchBox, "%s%c", searchBox, c);
-        searchBuff_Suggest();
-    }
-}
-
-void searchBuff_backspace() {
-    if (strlen(searchBox) > 0) {
-        searchBox[strlen(searchBox)-1] = '\0';
-        searchBuff_Suggest();
-    } 
-}
-
-void searchBuff_search() {
-    if (strlen(searchBox) == 0) return;
-    char meaning[MEAN_MAX_LEN];
-    int searchResult = dictFindWord(dict, searchBox, meaning);
-    if (searchResult != 0) {
-        UI_Notify1_Push("This word this not in my dictionary.");
-    } else {
-        clear();
-        UI_InfoBoard();
-        printf("[[[ "); printUpper(searchBox); printf(" ]]]");
-        printf("%s\n", meaning);
-        printf("Press any key to exit word view...\n");
-        getch();
-        strcpy(searchBox, "");
-    }
-}
 
 void printAllWords(BTA * dict) {
     int rsize;
@@ -86,17 +53,7 @@ void printAllWords(BTA * dict) {
 }
 
 
-// When starting the dictionary, if a BTree database is not available, use will be prompt to create new database from text file.
-// This func. is responsible for process "Yes" button. 
-void loadDictPromptYes (GtkWidget *widget, gpointer data) {
-    gtk_widget_hide(GTK_WIDGET(loadDictPromptDialog));
-    createDictionary("EV_text_dict.txt", "BTree_dict.dat", &dict, meaningViewBuff);
-    makeWordList(dict, &dictWordList, &dictWordListSize);
-}
-// This func. is responsible for process "No" button.
-void loadDictPromptNo (GtkWidget *widget, gpointer data) {
-    gtk_widget_hide(GTK_WIDGET(loadDictPromptDialog));
-}
+
 
 
 int main(int argc, char const *argv[])
@@ -138,11 +95,27 @@ int main(int argc, char const *argv[])
 }
 
 
-void on_lookup_entry_activate() {
-    const gchar * searchEntryText = gtk_entry_buffer_get_text (gtk_entry_get_buffer (lookupEntry));
 
+void quit() {
+    btcls(dict);
+    exit(0);
+}
+
+
+void dictLookup(BTA * dict, const char * word, GtkTextBuffer * meaningViewBuff, char * currentWord) {
     char meaning[MEAN_MAX_LEN];
-    int searchResult = dictFindWord(dict, searchEntryText, meaning);
+    int searchResult = dictFindWord(dict, word, meaning);
+    if (searchResult != 0) {
+        gtk_text_buffer_set_text(meaningViewBuff, "Not found!", -1);
+    } else {
+        strcpy(currentWord, word);
+        gtk_text_buffer_set_text(meaningViewBuff, meaning, -1);
+    }
+}
+
+void dictLookupNext(BTA * dict, char * currentWord, GtkTextBuffer * meaningViewBuff) {
+    char meaning[MEAN_MAX_LEN];
+    int searchResult = dictFindNextWord(dict, currentWord, meaning);
     if (searchResult != 0) {
         gtk_text_buffer_set_text(meaningViewBuff, "Not found!", -1);
     } else {
@@ -150,9 +123,48 @@ void on_lookup_entry_activate() {
     }
 }
 
+void dictLookupPrev(BTA * dict, char * currentWord, GtkTextBuffer * meaningViewBuff) {
+    char meaning[MEAN_MAX_LEN];
+    int searchResult = dictFindPrevWord(dict, currentWord, meaning);
+    if (searchResult != 0) {
+        gtk_text_buffer_set_text(meaningViewBuff, "Not found!", -1);
+    } else {
+        gtk_text_buffer_set_text(meaningViewBuff, meaning, -1);
+    }
+}
+
+void on_next_word_btn() {
+    dictLookupNext(dict, currentWord, meaningViewBuff);
+    gtk_entry_buffer_set_text (gtk_entry_get_buffer (lookupEntry), currentWord, strlen(currentWord));
+}
+
+void on_prev_word_btn() {
+    dictLookupPrev(dict, currentWord, meaningViewBuff);
+    gtk_entry_buffer_set_text (gtk_entry_get_buffer (lookupEntry), currentWord, strlen(currentWord));
+}
+
+void on_lookup_entry_activate() {
+    const gchar * searchEntryText = gtk_entry_buffer_get_text (gtk_entry_get_buffer (lookupEntry));
+    dictLookup(dict, searchEntryText, meaningViewBuff, currentWord);
+}
+
+
+
 // called when window is closed
 void on_window_main_destroy()
 {
     gtk_main_quit();
     quit();
+}
+
+// When starting the dictionary, if a BTree database is not available, use will be prompt to create new database from text file.
+// This func. is responsible for process "Yes" button. 
+void loadDictPromptYes (GtkWidget *widget, gpointer data) {
+    gtk_widget_hide(GTK_WIDGET(loadDictPromptDialog));
+    createDictionaryDBFromText("EV_text_dict.txt", "BTree_dict.dat", &dict, meaningViewBuff);
+    makeWordList(dict, &dictWordList, &dictWordListSize);
+}
+// This func. is responsible for process "No" button.
+void loadDictPromptNo (GtkWidget *widget, gpointer data) {
+    gtk_widget_hide(GTK_WIDGET(loadDictPromptDialog));
 }
