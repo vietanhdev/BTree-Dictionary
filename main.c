@@ -12,7 +12,6 @@
 #include "main.h"
 
 
-
 void createTestDB() {
     dict_t dict;
     createDictionaryDBFromText(&dict, "E-V dict.", "EV_text_dict.txt", "BTree_dict.dat", meaningViewBuff);
@@ -20,9 +19,6 @@ void createTestDB() {
     dictListSave(dictList, dictListSize, dictListFilename);
     currentDict = dict;
 }
-
-
-// Prototypes
 
 int main(int argc, char const *argv[])
 {
@@ -52,12 +48,12 @@ int main(int argc, char const *argv[])
 
     // Load the dictionary
     btinit();
-    //dict = btopn("BTree_dict.dat", 0, FALSE);
-    //if (dict == NULL) {
+    if (dictListSize == 0) {
         loadDictPromptDialog = GTK_DIALOG(gtk_builder_get_object(builder, "load-dict-prompt"));
         gtk_widget_show(GTK_WIDGET(loadDictPromptDialog));
-    //}
+    }
 
+    
     gtk_widget_show(main_window);
     g_object_unref(builder);
     gtk_main();

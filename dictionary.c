@@ -115,6 +115,7 @@ void createDictionaryDBFromText(dict_t * dict, const char * dictName, const char
     //free used memory
     free(word); free(meaning);
     free(tmp_word); free(tmp_meaning);
+    free(line);
 
     // Save the dictionary by re-opening
     sprintf(notify, "\nSaving file...\n");
@@ -125,9 +126,6 @@ void createDictionaryDBFromText(dict_t * dict, const char * dictName, const char
 
     sprintf(notify, "Making word list...\n");
     gtk_text_buffer_insert_at_cursor (notifyBuff, notify, strlen(notify));
-
-
-    wordListBuild(dict->dict, &(dict->wordList), &(dict->wordListSize));
 
     gtk_text_buffer_insert_at_cursor (notifyBuff, "Loading done. Use lookup entry to lookup words.", -1);
 }
@@ -168,10 +166,12 @@ int dictClose(dict_t *dict){
 void wordListAddWord(char * word, char *** wordList, int * wordListSize) {
     int id = *wordListSize; // index of next word
 
-    if ((*wordList = realloc(*wordList, ((*wordListSize) + 1) * sizeof(**wordList))) == NULL) {
+
+    if ((*wordList = realloc(*wordList, (*wordListSize + 1) * sizeof (char*))) == NULL) {
         printf("Cannot allocate memory.\n");
         exit(1);
     };
+
 
     (*wordList)[id] = (char *)malloc((strlen(word) + 1) * sizeof(char));
     if ((*wordList)[id] == NULL) {
@@ -180,7 +180,8 @@ void wordListAddWord(char * word, char *** wordList, int * wordListSize) {
     }
 
     strncpy((*wordList)[id], word, strlen(word));
-    // // force a terminal character
+    
+    // force a terminal character
     (*wordList)[id][strlen(word)] = '\0';
 
     *wordListSize = id+1;
@@ -211,17 +212,19 @@ void wordListEmpty(char *** wordList, int * wordListSize) {
     }
 
     // Free previous wordList
-    if (*wordListSize > 0) {
-        printf("%d", *wordListSize);
-        for (i = 0; i < *wordListSize; i++) {
-            free(**wordList);
-        }
-        free(*wordList);
-    }
+    // if (*wordListSize > 0) {
+    //     for (i = 0; i < *wordListSize; i++) {
+    //         printf("Free: %d\n", i);
+    //         if ((*wordList)[i] != NULL) free((*wordList)[i]);
+    //     }
+    // }
+
     *wordListSize = 0;
 
     // Create a new word list
-    *wordList = (char **)malloc(0);
+    if (*wordList == NULL) *wordList = (char **)malloc(0);
+
+
     if (*wordList == NULL) {
         printf("Cannot allocate memory for wordList.\n");
         exit(1);

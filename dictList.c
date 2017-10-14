@@ -5,8 +5,14 @@
 
 // init dictList
 void dictListInit(dict_t ** dictList, int * dictListSize, const char * dictListFilename) {
+    int i;    
+
     dictListEmpty(dictList, dictListSize);
     dictListSave(*dictList, *dictListSize, dictListFilename);
+
+    for (i = 0; i < *dictListSize; ++i) {
+        dictOpen(&(*dictList[i]));
+    }
 }
 
 
@@ -61,6 +67,7 @@ void dictListSave(dict_t * dictList, int dictListSize, const char * dictListFile
 
 // add a dictionary to list
 void dictListAddDict(dict_t dict, dict_t ** dictList, int * dictListSize) {
+    dictOpen(&(dict));
     *dictList = realloc(*dictList, sizeof(dict_t) * (*dictListSize + 1));
     *dictList[(*dictListSize)++] = dict;
 }
@@ -69,8 +76,10 @@ void dictListAddDict(dict_t dict, dict_t ** dictList, int * dictListSize) {
 // remove a dictionary from list
 void dictListRemoveDict(dict_t ** dictList, int * dictListSize, int dictID) {
     int i;
-
     if (dictID < *dictListSize) {
+        // Close dictionary
+        dictClose(&(*dictList[dictID]));
+
         for (i = dictID+1; i < *dictListSize; ++i) {
             *dictList[dictID-1] = *dictList[dictID];
         }
