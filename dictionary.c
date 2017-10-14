@@ -125,6 +125,8 @@ void createDictionaryDBFromText(dict_t * dict, const char * dictName, const char
 
     sprintf(notify, "Making word list...\n");
     gtk_text_buffer_insert_at_cursor (notifyBuff, notify, strlen(notify));
+
+
     wordListBuild(dict->dict, &(dict->wordList), &(dict->wordListSize));
 
     gtk_text_buffer_insert_at_cursor (notifyBuff, "Loading done. Use lookup entry to lookup words.", -1);
@@ -202,6 +204,12 @@ void wordListBuild(BTA * dict, char *** wordList, int * wordListSize) {
 
 void wordListEmpty(char *** wordList, int * wordListSize) {
     int i;
+
+    // Initial value
+    if (*wordList == NULL) {
+        *wordListSize = 0;
+    }
+
     // Free previous wordList
     if (*wordListSize > 0) {
         printf("%d", *wordListSize);
@@ -215,7 +223,7 @@ void wordListEmpty(char *** wordList, int * wordListSize) {
     // Create a new word list
     *wordList = (char **)malloc(0);
     if (*wordList == NULL) {
-        printf("Cannot allocate memory.\n");
+        printf("Cannot allocate memory for wordList.\n");
         exit(1);
     }
 }

@@ -52,7 +52,6 @@ void dictListSave(dict_t * dictList, int dictListSize, const char * dictListFile
         exit(1);
     }
 
-    printf("List Size: %d\n", dictListSize);
     fwrite(dictList, sizeof(dict_t), dictListSize * sizeof(dict_t), dbFile);
     fclose(dbFile);
 }
