@@ -14,10 +14,9 @@
 
 
 void createTestDB() {
-    dictListInit(dictList, &dictListSize);
     dict_t dict;
     createDictionaryDBFromText(&dict, "E-V dict.", "EV_text_dict.txt", "BTree_dict.dat", meaningViewBuff);
-    dictListAddDict(dict, dictList, &dictListSize);
+    dictListAddDict(dict, &dictList, &dictListSize);
     dictListSave(dictList, dictListSize, dictListFilename);
     currentDict = dict;
 }
@@ -29,6 +28,10 @@ int main(int argc, char const *argv[])
 {
     char *locale;
     locale = setlocale(LC_ALL, "");
+
+    // Initialize the dictionary list
+    dictListInit(&dictList, &dictListSize, dictListFilename);
+
 
     gtk_init(NULL, NULL);
 
