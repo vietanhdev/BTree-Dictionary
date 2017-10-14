@@ -46,4 +46,5 @@ $(ODIR)/%.o: %.c $(DEPS)
  
 clean:
 	rm -f $(ODIR)/*.o *~ $(TARGET)
+	rm *.dat
 	@echo "Cleanup complete!"

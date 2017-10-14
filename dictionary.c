@@ -3,127 +3,23 @@
 #include <wchar.h>
 #include "extio.h"
 #include "dictionary.h"
-#include "UI.h"
 #include "string_ext.h"
 
 
-char ** dictWordList;
-int dictWordListSize;
-
-
-// To determin if str is prefix of word
-// return 1: is prefix; 0: not prefix; 2: str=word
-int suggestWordCmp(char * str, char * word) {
-    int i;
-    if (strcmp(str, word) == 0) return 2;
-    if (strlen(str) > strlen(word)) return 0;
-
-    for (i = 0; i < strlen(str); i++) {
-        if (str[i] != word[i]) {
-            return 0;
-        }
-    }
-
-    return 1;
-}
-
-// return 0: 0 word matched; return 1: some words matched;
-int wordListSuggest(char * suggestStr, char * str, char ** wordList, int wordListSize) {
-    int i;
-    int countSuggest;
-    //int matchId = -1; // id of the word that
-    //int matchResult;
-
-    strcpy(suggestStr, "");
-
-    countSuggest = 0;
-    for (i = 0; i < wordListSize; i++) {
-        if (suggestWordCmp(str, wordList[i]) != 0) {
-            sprintf(suggestStr, "%s  %s", suggestStr, wordList[i]);
-            countSuggest++;
-        }
-        if (countSuggest == SUGGEST_WORD_NUM) {
-            return 1;
-        }
-    }
-
-    if (countSuggest == 0) {
-        return 0;
-    } else {
-        return 1;
-    }
-}
-
-
-void wordListEmpty(char *** wordList, int * wordListSize) {
-    int i;
-    // Free previous wordList
-    if (*wordListSize > 0) {
-            //for (i = 0; i <= *wordListSize; i++) {
-            free(**wordList);
-            //}
-        free(*wordList);
-    }
-    *wordListSize = 0;
-
-    // Create a new word list
-    *wordList = (char **)malloc(0);
-    if (*wordList == NULL) {
-        printf("Cannot allocate memory.\n");
-        exit(1);
-    }
-}
-
-void wordListAddWord(char * word, char *** wordList, int * wordListSize) {
-    int id = *wordListSize; // index of next word
-
-    if ((*wordList = realloc(*wordList, ((*wordListSize) + 1) * sizeof(**wordList))) == NULL) {
-        printf("Cannot allocate memory.\n");
-        exit(1);
-    };
-
-    (*wordList)[id] = (char *)malloc((strlen(word) + 1) * sizeof(char));
-    if ((*wordList)[id] == NULL) {
-        printf("Cannot allocate memory.\n");
-        exit(1);
-    }
-
-    strncpy((*wordList)[id], word, strlen(word));
-    // // force a terminal character
-    (*wordList)[id][strlen(word)] = '\0';
-
-    *wordListSize = id+1;
-}
-
-
-// This function create a word list to use in autocomplete and autocorrection function
-void makeWordList(BTA * dict, char *** wordList, int * wordListSize) {
-    char word[WORD_MAX_LEN];
-    BTint value;
-    
-    // Empty word list
-    wordListEmpty(wordList, wordListSize);
-
-    // extract words from Btree
-    btpos(dict, ZSTART);
-    while(bnxtky(dict, word, &value) == 0) {
-        wordListAddWord(word, wordList, wordListSize);
-    }
-
-}
-
-
 // This function create a BTree dictionary from a txt file
-void createDictionaryDBFromText(const char * textFileName, const char * dictFileName, BTA ** dict, GtkTextBuffer  *notifyBuff) {
+void createDictionaryDBFromText(dict_t * dict, const char * dictName, const char * textFileName, const char * dbFileName, GtkTextBuffer  *notifyBuff) {
+
+    strcpy(dict->name, dictName);
+    strcpy(dict->path, dbFileName);
 
     gtk_text_buffer_set_text (notifyBuff, "Loading dictionary...\n", -1);
 
     int WordCount = 0; // count the number of words in dictionary
 
-    btcls(*dict); // close if a dictionary file was opened. 
+    btcls(dict->dict); // close if a dictionary file was opened. 
     // below line is required for operating correctly.
 
-    *dict = btcrt(dictFileName, 0, FALSE);
+    dict->dict =  btcrt(dict->path, 0, FALSE);
 
     wchar_t * tmp_word; // widechar word
     wchar_t * tmp_meaning; // widechar meaning
@@ -200,7 +96,7 @@ void createDictionaryDBFromText(const char * textFileName, const char * dictFile
                 wcstombs(meaning, tmp_meaning, MEAN_MAX_LEN*sizeof(char));
 
 
-                dictAddWord(*dict, word, meaning, notifyBuff);
+                dictAddWord(dict->dict, word, meaning, notifyBuff);
 
                 // print realtime info
                 WordCount++;
@@ -223,64 +119,122 @@ void createDictionaryDBFromText(const char * textFileName, const char * dictFile
     // Save the dictionary by re-opening
     sprintf(notify, "\nSaving file...\n");
     gtk_text_buffer_insert_at_cursor (notifyBuff, notify, -1);
-    btcls(*dict);
-    *dict = btopn(dictFileName, 0, FALSE);
+    btcls(dict->dict);
+    dict->dict = btopn(dbFileName, 0, FALSE);
 
 
     sprintf(notify, "Making word list...\n");
     gtk_text_buffer_insert_at_cursor (notifyBuff, notify, strlen(notify));
-    makeWordList(*dict, &dictWordList, &dictWordListSize);
+    wordListBuild(dict->dict, &(dict->wordList), &(dict->wordListSize));
 
     gtk_text_buffer_insert_at_cursor (notifyBuff, "Loading done. Use lookup entry to lookup words.", -1);
 }
 
+// Create new dictionary
+dict_t dictCreate(const char* name,const char* path) {
+    dict_t newDict;
 
-int dictFindWord(BTA * dict, const char * word, char * meaning) {
-    int return_value;
-    int meaningLength;
-    char * wordLower;
+    strcpy(newDict.name, name);
+    strcpy(newDict.path, path);
+
+    newDict.dict = btcrt(path, 0, FALSE);
+
+    newDict.wordListSize = 0;
+    
+    // build the word list
+    wordListBuild(newDict.dict, &(newDict.wordList), &(newDict.wordListSize));
+
+    return newDict;
+}
+
+int dictOpen(dict_t *dict) {
+    dict->dict = btopn(dict->path, 0, FALSE);
+
+    // build the word list
+    wordListBuild(dict->dict, &(dict->wordList), &(dict->wordListSize));
+
+    if(dict->dict != NULL) return 1;
+    else return 0;
+}
+
+int dictClose(dict_t *dict){
+    btcls(dict->dict);
+    return 1;
+}
 
 
-    wordLower = malloc(WORD_MAX_LEN * sizeof(char));
-    if (wordLower == NULL) {
-        printf("Cannot allocate memory!\n");
+void wordListAddWord(char * word, char *** wordList, int * wordListSize) {
+    int id = *wordListSize; // index of next word
+
+    if ((*wordList = realloc(*wordList, ((*wordListSize) + 1) * sizeof(**wordList))) == NULL) {
+        printf("Cannot allocate memory.\n");
+        exit(1);
+    };
+
+    (*wordList)[id] = (char *)malloc((strlen(word) + 1) * sizeof(char));
+    if ((*wordList)[id] == NULL) {
+        printf("Cannot allocate memory.\n");
         exit(1);
     }
 
-    strLower(wordLower, word);
-    return_value =  btsel(dict, wordLower, meaning, MEAN_MAX_LEN, &meaningLength);
-    free(wordLower);
+    strncpy((*wordList)[id], word, strlen(word));
+    // // force a terminal character
+    (*wordList)[id][strlen(word)] = '\0';
 
-    return return_value;
+    *wordListSize = id+1;
 }
 
-int dictFindNextWord(BTA * dict, char * currentWord, char * meaning) {
-    int return_value;
-    int meaningLength;
 
+// This function create a word list to use in autocomplete and autocorrection function
+void wordListBuild(BTA * dict, char *** wordList, int * wordListSize) {
+    char word[WORD_MAX_LEN];
     BTint value;
+    
+    // Empty word list
+    wordListEmpty(wordList, wordListSize);
 
-    bfndky(dict, currentWord, &value);
-
-    return_value =  btseln(dict, currentWord, meaning, MEAN_MAX_LEN, &meaningLength);
-
-    return return_value;
+    // extract words from Btree
+    btpos(dict, ZSTART);
+    while(bnxtky(dict, word, &value) == 0) {
+        wordListAddWord(word, wordList, wordListSize);
+    }
 }
 
+void wordListEmpty(char *** wordList, int * wordListSize) {
+    int i;
+    // Free previous wordList
+    if (*wordListSize > 0) {
+        printf("%d", *wordListSize);
+        for (i = 0; i < *wordListSize; i++) {
+            free(**wordList);
+        }
+        free(*wordList);
+    }
+    *wordListSize = 0;
 
-int dictFindPrevWord(BTA * dict, char * currentWord, char * meaning) {
-    int return_value;
-    int meaningLength;
-
-    BTint value;
-
-    bfndky(dict, currentWord, &value);
-
-    return_value =  btselp(dict, currentWord, meaning, MEAN_MAX_LEN, &meaningLength);
-
-    return return_value;
+    // Create a new word list
+    *wordList = (char **)malloc(0);
+    if (*wordList == NULL) {
+        printf("Cannot allocate memory.\n");
+        exit(1);
+    }
 }
 
+// To determin if str is prefix of word
+// return 1: is prefix; 0: not prefix; 2: str=word
+int suggestWordCmp(char * str, char * word) {
+    int i;
+    if (strcmp(str, word) == 0) return 2;
+    if (strlen(str) > strlen(word)) return 0;
+
+    for (i = 0; i < strlen(str); i++) {
+        if (str[i] != word[i]) {
+            return 0;
+        }
+    }
+
+    return 1;
+}
 
 int dictAddMeaning(BTA * dict, char * word, char * new_meaning, GtkTextBuffer  *notifyBuff) {
 
@@ -340,4 +294,65 @@ int dictAddWord(BTA * dict, char * word, char * meaning, GtkTextBuffer  *notifyB
     }
 
     return return_value;
+}
+
+
+int dictFindWord(dict_t dict, const char * word, char * meaning) {
+    int return_value;
+    int meaningLength;
+    char * wordLower;
+
+
+    wordLower = malloc(WORD_MAX_LEN * sizeof(char));
+    if (wordLower == NULL) {
+        printf("Cannot allocate memory!\n");
+        exit(1);
+    }
+
+    strLower(wordLower, word);
+    return_value =  btsel(dict.dict, wordLower, meaning, MEAN_MAX_LEN, &meaningLength);
+    free(wordLower);
+
+    return return_value;
+}
+
+int dictFindNextWord(dict_t dict, char * currentWord, char * meaning) {
+    int ret;
+    int meaningLength;
+
+    BTint value;
+
+    bfndky(dict.dict, currentWord, &value);
+
+    ret =  btseln(dict.dict, currentWord, meaning, MEAN_MAX_LEN, &meaningLength);
+
+    return ret;
+}
+
+int dictFindPrevWord(dict_t dict, char * currentWord, char * meaning) {
+    int ret;
+    int meaningLength;
+
+    BTint value;
+
+    bfndky(dict.dict, currentWord, &value);
+
+    ret =  btselp(dict.dict, currentWord, meaning, MEAN_MAX_LEN, &meaningLength);
+
+    return ret;
+}
+
+// Give suggestion based on "str"
+int wordListSuggest(char * str, char ** suggestList, int suggestListMaxSize, dict_t dict) {
+    int i;
+    int suggestListSize = 0;
+    for (i = 0; i < dict.wordListSize; i++) {
+        if (suggestWordCmp(str, dict.wordList[i])) {
+            strcpy(suggestList[suggestListSize++], dict.wordList[i]);
+            if (suggestListSize >= suggestListMaxSize) {
+                return suggestListSize;
+            }
+        }
+    }
+    return suggestListSize;
 }

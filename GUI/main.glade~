@@ -315,6 +315,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="image">bac</property>
+                    <signal name="clicked" handler="on_prev_word_btn" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -344,6 +345,7 @@
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="image">nex</property>
+                    <signal name="clicked" handler="on_next_word_btn" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -392,6 +394,8 @@
             </child>
             <child>
               <object class="GtkTextView" id="meaning-view">
+                <property name="width_request">500</property>
+                <property name="height_request">400</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="border_width">2</property>
