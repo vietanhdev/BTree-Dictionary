@@ -18,3 +18,5 @@ GtkTextView *meaningView;
 GtkTextBuffer  *meaningViewBuff;
 
 GtkDialog * loadDictPromptDialog;
+
+GtkComboBoxText * dictSelector;

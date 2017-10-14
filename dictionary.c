@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <wchar.h>
+#include <gtk/gtk.h>
 #include "extio.h"
 #include "dictionary.h"
 #include "string_ext.h"
@@ -37,8 +38,6 @@ void createDictionaryDBFromText(dict_t * dict, const char * dictName, const char
     word = malloc(WORD_MAX_LEN * sizeof(char));
     meaning = malloc(MEAN_MAX_LEN * sizeof(char));
 
-
-    //printf("%p - %p - %p - %p\n", tmp_word, tmp_meaning, word, meaning); getch();
 
     line = malloc(LINE_WC_MAX_LEN * sizeof(wchar_t));
 
@@ -147,9 +146,8 @@ dict_t dictCreate(const char* name,const char* path) {
     return newDict;
 }
 
-int dictOpen(dict_t *dict) {
+int dictOpen(dict_t * dict) {
     dict->dict = btopn(dict->path, 0, FALSE);
-
     // build the word list
     wordListBuild(dict->dict, &(dict->wordList), &(dict->wordListSize));
 
@@ -167,7 +165,7 @@ void wordListAddWord(char * word, char *** wordList, int * wordListSize) {
     int id = *wordListSize; // index of next word
 
 
-    if ((*wordList = realloc(*wordList, (*wordListSize + 1) * sizeof (char*))) == NULL) {
+    if ((*wordList = (char**)realloc(*wordList, (*wordListSize + 1) * sizeof (char*))) == NULL) {
         printf("Cannot allocate memory.\n");
         exit(1);
     };
@@ -178,6 +176,7 @@ void wordListAddWord(char * word, char *** wordList, int * wordListSize) {
         printf("Cannot allocate memory.\n");
         exit(1);
     }
+
 
     strncpy((*wordList)[id], word, strlen(word));
     
@@ -222,7 +221,7 @@ void wordListEmpty(char *** wordList, int * wordListSize) {
     *wordListSize = 0;
 
     // Create a new word list
-    if (*wordList == NULL) *wordList = (char **)malloc(0);
+    *wordList = (char **)malloc(0);
 
 
     if (*wordList == NULL) {

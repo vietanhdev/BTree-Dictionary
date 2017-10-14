@@ -16,6 +16,7 @@ void createTestDB() {
     dict_t dict;
     createDictionaryDBFromText(&dict, "E-V dict.", "EV_text_dict.txt", "BTree_dict.dat", meaningViewBuff);
     dictListAddDict(dict, &dictList, &dictListSize);
+    dictListUpdateSelector(dictList, dictListSize, dictSelector);
     dictListSave(dictList, dictListSize, dictListFilename);
     currentDict = dict;
 }
@@ -25,9 +26,7 @@ int main(int argc, char const *argv[])
     char *locale;
     locale = setlocale(LC_ALL, "");
 
-    // Initialize the dictionary list
-    dictListInit(&dictList, &dictListSize, dictListFilename);
-
+    btinit();
 
     gtk_init(NULL, NULL);
 
@@ -45,9 +44,18 @@ int main(int argc, char const *argv[])
     gtk_text_view_set_buffer (meaningView, meaningViewBuff);
     gtk_text_buffer_set_text(meaningViewBuff, "", -1);
 
+    dictSelector = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "dict-selector"));
+
+
+    // Initialize the dictionary list
+    dictListOpen(&dictList, &dictListSize, dictListFilename, dictSelector);
+    if (dictListSize > 0) {
+        printf("deful\n");
+        currentDict = dictList[0];
+    }
+
 
     // Load the dictionary
-    btinit();
     if (dictListSize == 0) {
         loadDictPromptDialog = GTK_DIALOG(gtk_builder_get_object(builder, "load-dict-prompt"));
         gtk_widget_show(GTK_WIDGET(loadDictPromptDialog));
