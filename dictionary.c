@@ -306,6 +306,20 @@ int dictAddWord(BTA * dict, char * word, char * meaning, GtkTextBuffer  *notifyB
     return return_value;
 }
 
+// delete word from dictionary
+void dictDelWord(BTA * dict, char * word, GtkTextBuffer  *notifyBuff) {
+    // standarlize word to use as key
+    strLower(word, word);
+    trim(word);
+
+    btdel(dict, word);
+
+    gtk_text_buffer_set_text (notifyBuff, "Deleted a word: ", -1);
+    gtk_text_buffer_insert_at_cursor (notifyBuff, word, -1);
+    gtk_text_buffer_insert_at_cursor (notifyBuff, "\0", -1);
+
+}
+
 
 int dictFindWord(dict_t dict, const char * word, char * meaning) {
     int return_value;

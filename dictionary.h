@@ -82,7 +82,11 @@ int suggestWordCmp(char * str, char * word);
 // Give suggestion based on "str"
 int wordListSuggest(char * str, char ** suggestList, int suggestListMaxSize, dict_t dict);
 
-
+// add word to dictionary
 int dictAddWord(BTA * dict, char * word, char * meaning, GtkTextBuffer  *notifyBuff);
+
+
+// delete word from dictionary
+void dictDelWord(BTA * dict, char * word, GtkTextBuffer  *notifyBuff);
 
 #endif

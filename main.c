@@ -50,7 +50,6 @@ int main(int argc, char const *argv[])
     // Initialize the dictionary list
     dictListOpen(&dictList, &dictListSize, dictListFilename, dictSelector);
     if (dictListSize > 0) {
-        printf("deful\n");
         currentDict = dictList[0];
     }
 
@@ -63,7 +62,7 @@ int main(int argc, char const *argv[])
 
     
     gtk_widget_show(main_window);
-    g_object_unref(builder);
+    //g_object_unref(builder);
     gtk_main();
     return 0;
 }
@@ -117,6 +116,26 @@ void on_lookup_entry_activate() {
     dictLookup(currentDict, searchEntryText, meaningViewBuff, currentWord);
 }
 
+
+void on_delete_btn_yes() {
+    GtkDialog * deleteCurrentWordDialog = GTK_DIALOG(gtk_builder_get_object(builder, "del-current-word-prompt"));
+    gtk_widget_hide(GTK_WIDGET(deleteCurrentWordDialog));
+    dictDelWord(currentDict.dict, currentWord, meaningViewBuff);
+    wordListBuild(currentDict.dict, &(currentDict.wordList), &(currentDict.wordListSize));
+}
+
+void on_delete_btn_no() {
+    GtkDialog * deleteCurrentWordDialog = GTK_DIALOG(gtk_builder_get_object(builder, "del-current-word-prompt"));
+    gtk_widget_hide(GTK_WIDGET(deleteCurrentWordDialog));
+}
+
+// Handle delete button
+void on_delete_btn() {
+    if (strcmp(currentWord, "") != 0) {
+        GtkDialog * deleteCurrentWordDialog = GTK_DIALOG(gtk_builder_get_object(builder, "del-current-word-prompt"));
+        gtk_widget_show(GTK_WIDGET(deleteCurrentWordDialog));
+    }
+}
 
 
 // When starting the dictionary, if a BTree database is not available, use will be prompt to create new database from text file.

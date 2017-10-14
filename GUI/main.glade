@@ -67,6 +67,89 @@
     <property name="can_focus">False</property>
     <property name="icon_name">help-about</property>
   </object>
+  <object class="GtkDialog" id="load-dict-prompt1">
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Init. Prompt</property>
+    <property name="modal">True</property>
+    <property name="window_position">center-on-parent</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="icon_name">address-book-new</property>
+    <property name="type_hint">dialog</property>
+    <property name="urgency_hint">True</property>
+    <property name="transient_for">main-window</property>
+    <property name="attached_to">main-window</property>
+    <property name="startup_id">s</property>
+    <child internal-child="vbox">
+      <object class="GtkBox" id="dialog-vbox3">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox" id="dialog-action_area3">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="load-dict-prompt-yes1">
+                <property name="label" translatable="yes">Yes</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="margin_top">4</property>
+                <property name="margin_bottom">4</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="padding">5</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="load-dict-prompt-no1">
+                <property name="label" translatable="yes">No</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="opacity">0.94117647058823528</property>
+                <property name="margin_top">4</property>
+                <property name="margin_bottom">4</property>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="padding">5</property>
+                <property name="pack_type">end</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="init-prompt1">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="opacity">0.98039215686274506</property>
+            <property name="xpad">5</property>
+            <property name="ypad">5</property>
+            <property name="label" translatable="yes">There is no dictionary created. Create a new dictionary from text file?</property>
+            <property name="justify">center</property>
+            <property name="wrap">True</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="padding">8</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
   <object class="GtkEntryBuffer" id="lookup-field-buff"/>
   <object class="GtkEntryCompletion" id="lookup-field-completion"/>
   <object class="GtkImage" id="manage-dict">
@@ -396,6 +479,7 @@
                     <property name="image">remove</property>
                     <property name="relief">half</property>
                     <property name="always_show_image">True</property>
+                    <signal name="clicked" handler="on_delete_btn" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -466,7 +550,7 @@
       </object>
     </child>
   </object>
-  <object class="GtkDialog" id="load-dict-prompt">
+  <object class="GtkDialog" id="del-current-word-prompt">
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Init. Prompt</property>
     <property name="modal">True</property>
@@ -479,7 +563,7 @@
     <property name="attached_to">main-window</property>
     <property name="startup_id">s</property>
     <child internal-child="vbox">
-      <object class="GtkBox" id="load-dict-prompt-box">
+      <object class="GtkBox" id="delete-prompt-box">
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <property name="spacing">2</property>
@@ -488,7 +572,7 @@
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkButton" id="load-dict-prompt-yes">
+              <object class="GtkButton" id="del-current-word-prompt-yes">
                 <property name="label" translatable="yes">Yes</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -497,7 +581,7 @@
                 <property name="margin_right">4</property>
                 <property name="margin_top">4</property>
                 <property name="margin_bottom">4</property>
-                <signal name="clicked" handler="loadDictPromptYes" swapped="no"/>
+                <signal name="clicked" handler="on_delete_btn_yes" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -507,7 +591,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="load-dict-prompt-no">
+              <object class="GtkButton" id="del-current-word-prompt-no">
                 <property name="label" translatable="yes">No</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -517,7 +601,7 @@
                 <property name="margin_right">4</property>
                 <property name="margin_top">4</property>
                 <property name="margin_bottom">4</property>
-                <signal name="clicked" handler="loadDictPromptNo" swapped="no"/>
+                <signal name="clicked" handler="on_delete_btn_no" swapped="no"/>
               </object>
               <packing>
                 <property name="expand">True</property>
@@ -541,7 +625,7 @@
             <property name="opacity">0.97999999999999998</property>
             <property name="xpad">5</property>
             <property name="ypad">5</property>
-            <property name="label" translatable="yes">There is no dictionary created. Create a new dictionary from text file?</property>
+            <property name="label" translatable="yes">Delete current word?</property>
             <property name="justify">center</property>
             <property name="wrap">True</property>
           </object>
