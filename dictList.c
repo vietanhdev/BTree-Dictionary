@@ -3,7 +3,13 @@
 #include "dictionary.h"
 
 // init dictList
-void dictListInit(dict_t * dictList, int * dictListSize) {
+void dictListInit(dict_t * dictList, int * dictListSize, const char * dictListFilename) {
+    dictListEmpty(dictList, &dictListSize);
+    dictListSave(dictList, &dictListSize, dictListFilename);
+}
+
+
+void dictListEmpty(dict_t * dictList, int * dictListSize) {
     if (dictList != NULL) {
         free(dictList);
     }
@@ -16,16 +22,12 @@ void dictListOpen(dict_t * dictList, int * dictListSize, const char * dictListFi
     FILE * dbFile;
     // try to open db file to read
     if ((dbFile = fopen(dictListFilename, "r")) == NULL) {
-        // if file is not exist, create a new file
-        if ((dbFile = fopen(dictListFilename, "w")) == NULL) {
-
-            // Init an empty dictionary list
-            dictListInit(dictList, dictListSize);
-        }
+        // Init an empty dictionary list
+        dictListInit(dictList, dictListSize, dictListFilename);
     } else {
 
         // Init an empty dictionary list
-        dictListInit(dictList, dictListSize);
+        dictListEmpty(dictList, dictListSize);
 
         // tmp variable for reading dictionary db
         dict_t dict;
