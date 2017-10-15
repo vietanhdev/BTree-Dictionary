@@ -33,6 +33,7 @@ GtkEntry * wordEditWordEntry;
 GtkTextView * wordEditMeaningTextView;
 GtkTextBuffer *wordEditMeaningBuff;
 char wordEditOrigin[WORD_MAX_LEN];
+int wordEditMode; //  = 0: edit a word on dictionary; = 1: add a word to dictionary
 
 
 // Word deleting

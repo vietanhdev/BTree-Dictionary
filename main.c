@@ -12,11 +12,13 @@
 #include "main.h"
 
 
-void createTestDB() {
+// Create a initial database when no database is avaiable
+void createInitDB() {
     dict_t dict;
     createDictionaryDBFromText(&dict, "E-V dict.", "EV_text_dict.txt", "BTree_dict.dat", meaningViewBuff);
     dictListAddDict(dict, &dictList, &dictListSize);
     dictListUpdateSelector(dictList, dictListSize, dictSelector);
+    gtk_combo_box_set_active (GTK_COMBO_BOX(dictSelector), 0);
     dictListSave(dictList, dictListSize, dictListFilename);
     currentDict = dict;
 }
@@ -161,10 +163,16 @@ void on_edit_save() {
     strcpy(word, (char*)gtk_entry_get_text (GTK_ENTRY(wordEditWordEntry)));
     strcpy(meaning, (char*)gtk_text_buffer_get_text (wordEditMeaningBuff, &start, &end, 1));
 
-    // Delete original word and add new edited word
-    dictDelWord(currentDict.dict, wordEditOrigin, NULLnotifyBuff);
+    if (wordEditMode == 0) { // edit word
+        // Delete original word and add new edited word
+        dictDelWord(currentDict.dict, wordEditOrigin, NULLnotifyBuff);
+        gtk_text_buffer_set_text(meaningViewBuff, "Edited: ", -1);
+    } else { // add word
+        gtk_text_buffer_set_text(meaningViewBuff, "Added: ", -1);
+    }
     dictAddWord(currentDict.dict, word, meaning, meaningViewBuff);
-    //dictAddWord(currentDict.dict, "wordss", "meaning", meaningViewBuff);
+    
+    gtk_text_buffer_insert_at_cursor (meaningViewBuff, word, -1);
 }
 
 void on_edit_cancel() {
@@ -177,6 +185,10 @@ void on_edit_btn() {
     gchar * wordMeaning;
 
     if (strlen(currentWord) > 0) {
+        wordEditMode = 0; // editing mode
+
+        gtk_window_set_title (GTK_WINDOW(wordEditWindow), "Editing current word");
+
         gtk_entry_set_text (GTK_ENTRY(wordEditWordEntry), currentWord);
         strcpy(wordEditOrigin, currentWord);
 
@@ -192,7 +204,11 @@ void on_edit_btn() {
 }
 
 
-
+void on_add_btn() {
+    wordEditMode = 1; // adding mode
+    gtk_window_set_title (GTK_WINDOW(wordEditWindow), "Add a word");
+    gtk_widget_show(GTK_WIDGET(wordEditWindow));
+}
 
 
 
@@ -200,7 +216,7 @@ void on_edit_btn() {
 // This func. is responsible for process "Yes" button. 
 void on_load_dict_yes (GtkWidget *widget, gpointer data) {
     gtk_widget_hide(GTK_WIDGET(loadDictPromptDialog));
-    createTestDB();
+    createInitDB();
 }
 // This func. is responsible for process "No" button.
 void on_load_dict_no (GtkWidget *widget, gpointer data) {
