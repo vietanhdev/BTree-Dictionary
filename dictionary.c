@@ -300,7 +300,10 @@ int dictAddWord(BTA * dict, char * word, char * meaning, GtkTextBuffer  *notifyB
     if (find == 0) {
         return_value = dictAddMeaning(dict, word, meaning, notifyBuff);
     } else {
+        printf("Adding\n");
+        printf("%s\n", word);
         return_value = btins(dict, word, meaning, strlen(meaning)*sizeof(char));
+        printf("Return: %d\n", return_value);
     }
 
     return return_value;

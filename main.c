@@ -38,14 +38,28 @@ int main(int argc, char const *argv[])
     main_window = GTK_WIDGET(gtk_builder_get_object(builder, "main-window"));
     gtk_builder_connect_signals(builder, NULL);
 
+    NULLnotifyBuff = GTK_TEXT_BUFFER(gtk_builder_get_object(builder, "NULL-buffer"));
 
+    // Lookup GUI
     lookupEntry = GTK_ENTRY(gtk_builder_get_object(builder, "lookup-entry"));
     meaningView = GTK_TEXT_VIEW(gtk_builder_get_object(builder, "meaning-view"));
     gtk_text_view_set_buffer (meaningView, meaningViewBuff);
     gtk_text_buffer_set_text(meaningViewBuff, "", -1);
-
     dictSelector = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "dict-selector"));
 
+
+    // Word editing GUI
+    wordEditWindow = GTK_WIDGET(gtk_builder_get_object(builder, "word-edit"));
+    wordEditWordEntry = GTK_ENTRY(gtk_builder_get_object(builder, "word-edit-word"));
+    wordEditMeaningTextView = GTK_TEXT_VIEW(gtk_builder_get_object(builder, "word-edit-meaning"));
+    wordEditMeaningBuff = GTK_TEXT_BUFFER(gtk_builder_get_object(builder, "word-edit-meaning-buff"));
+
+    // Word deleting GUI
+    wordDeletePromptDialog = GTK_DIALOG(gtk_builder_get_object(builder, "del-current-word-prompt"));
+
+
+    // Dict initial loading
+    loadDictPromptDialog = GTK_DIALOG(gtk_builder_get_object(builder, "load-dict-prompt"));
 
     // Initialize the dictionary list
     dictListOpen(&dictList, &dictListSize, dictListFilename, dictSelector);
@@ -56,7 +70,6 @@ int main(int argc, char const *argv[])
 
     // Load the dictionary
     if (dictListSize == 0) {
-        loadDictPromptDialog = GTK_DIALOG(gtk_builder_get_object(builder, "load-dict-prompt"));
         gtk_widget_show(GTK_WIDGET(loadDictPromptDialog));
     }
 
@@ -118,34 +131,84 @@ void on_lookup_entry_activate() {
 
 
 void on_delete_btn_yes() {
-    GtkDialog * deleteCurrentWordDialog = GTK_DIALOG(gtk_builder_get_object(builder, "del-current-word-prompt"));
-    gtk_widget_hide(GTK_WIDGET(deleteCurrentWordDialog));
+    gtk_widget_hide(GTK_WIDGET(wordDeletePromptDialog));
     dictDelWord(currentDict.dict, currentWord, meaningViewBuff);
     wordListBuild(currentDict.dict, &(currentDict.wordList), &(currentDict.wordListSize));
 }
 
 void on_delete_btn_no() {
-    GtkDialog * deleteCurrentWordDialog = GTK_DIALOG(gtk_builder_get_object(builder, "del-current-word-prompt"));
-    gtk_widget_hide(GTK_WIDGET(deleteCurrentWordDialog));
+    gtk_widget_hide(GTK_WIDGET(wordDeletePromptDialog));
 }
 
 // Handle delete button
 void on_delete_btn() {
-    if (strcmp(currentWord, "") != 0) {
-        GtkDialog * deleteCurrentWordDialog = GTK_DIALOG(gtk_builder_get_object(builder, "del-current-word-prompt"));
-        gtk_widget_show(GTK_WIDGET(deleteCurrentWordDialog));
+    if (strlen(currentWord) > 0) {
+        gtk_widget_show(GTK_WIDGET(wordDeletePromptDialog));
+    }
+}
+
+void on_edit_save() {
+    GtkTextIter start;
+    GtkTextIter end;
+
+    char * word;
+    char * meaning;
+
+    gtk_widget_hide(GTK_WIDGET(wordEditWindow));
+
+    gtk_text_buffer_get_start_iter (wordEditMeaningBuff, &start);
+    gtk_text_buffer_get_end_iter (wordEditMeaningBuff, &end);
+
+    word = (char*)gtk_entry_get_text (GTK_ENTRY(wordEditWordEntry));
+    meaning = gtk_text_buffer_get_text (wordEditMeaningBuff, &start, &end, 1);
+
+
+    printf("Word:'%s'\n", word);
+    printf("Meaning:'%s'\n", meaning);
+
+    // Delete original word and add new edited word
+    dictDelWord(currentDict.dict, wordEditOrigin, NULLnotifyBuff);
+    dictAddWord(currentDict.dict, word, meaning, meaningViewBuff);
+
+}
+
+void on_edit_cancel() {
+    gtk_widget_hide(GTK_WIDGET(wordEditWindow));
+}
+
+void on_edit_btn() {
+    GtkTextIter start;
+    GtkTextIter end;
+    gchar * wordMeaning;
+
+    if (strlen(currentWord) > 0) {
+        gtk_entry_set_text (GTK_ENTRY(wordEditWordEntry), currentWord);
+        strcpy(wordEditOrigin, currentWord);
+
+        gtk_text_buffer_get_start_iter (meaningViewBuff, &start);
+        gtk_text_buffer_get_end_iter (meaningViewBuff, &end);
+
+        wordMeaning = gtk_text_buffer_get_text (meaningViewBuff, &start, &end, 1);
+
+        gtk_text_buffer_set_text (wordEditMeaningBuff,  wordMeaning, strlen(wordMeaning));
+        
+        gtk_widget_show(GTK_WIDGET(wordEditWindow));
     }
 }
 
 
+
+
+
+
 // When starting the dictionary, if a BTree database is not available, use will be prompt to create new database from text file.
 // This func. is responsible for process "Yes" button. 
-void loadDictPromptYes (GtkWidget *widget, gpointer data) {
+void on_load_dict_yes (GtkWidget *widget, gpointer data) {
     gtk_widget_hide(GTK_WIDGET(loadDictPromptDialog));
     createTestDB();
 }
 // This func. is responsible for process "No" button.
-void loadDictPromptNo (GtkWidget *widget, gpointer data) {
+void on_load_dict_no (GtkWidget *widget, gpointer data) {
     gtk_widget_hide(GTK_WIDGET(loadDictPromptDialog));
 }
 
