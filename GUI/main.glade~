@@ -338,9 +338,12 @@
     <property name="icon_name">address-book-new</property>
     <property name="type_hint">dialog</property>
     <property name="urgency_hint">True</property>
+    <property name="deletable">False</property>
     <property name="transient_for">main-window</property>
     <property name="attached_to">main-window</property>
     <property name="startup_id">s</property>
+    <signal name="close" handler="on_delete_btn_no" swapped="no"/>
+    <signal name="delete-event" handler="on_delete_btn_no" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkBox" id="delete-prompt-box">
         <property name="can_focus">False</property>
@@ -401,7 +404,6 @@
           <object class="GtkLabel" id="init-prompt">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="opacity">0.97999999999999998</property>
             <property name="xpad">5</property>
             <property name="ypad">5</property>
             <property name="label" translatable="yes">Delete current word?</property>
@@ -427,6 +429,7 @@
     <property name="icon_name">address-book-new</property>
     <property name="type_hint">dialog</property>
     <property name="urgency_hint">True</property>
+    <property name="deletable">False</property>
     <property name="transient_for">main-window</property>
     <property name="attached_to">main-window</property>
     <property name="startup_id">s</property>

@@ -54,3 +54,8 @@ gboolean lookupEntryMatchFunc(GtkEntryCompletion *completion,
 
 
 void wordListBuild();
+
+int on_lookup_match_selected(GtkEntryCompletion *widget,
+               GtkTreeModel       *model,
+               GtkTreeIter        *iter,
+               gpointer            user_data);

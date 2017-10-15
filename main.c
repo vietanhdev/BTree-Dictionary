@@ -24,10 +24,12 @@ void createInitDB() {
     wordListBuild();
 }
 
+
+// Match function for lookup completion
 gboolean lookupEntryMatchFunc(GtkEntryCompletion *completion,
-    const gchar *key,
-    GtkTreeIter *iter,
-    gpointer user_data) {
+                                    const gchar *key,
+                                    GtkTreeIter *iter,
+                                    gpointer user_data) {
     GtkTreeModel *model = gtk_entry_completion_get_model(completion);
     gchar *item;
     gtk_tree_model_get(model, iter, 0, &item, -1);
@@ -57,6 +59,8 @@ int main(int argc, char *argv[])
     char *locale;
     locale = setlocale(LC_ALL, "");
 
+    GtkTreeIter iter; // iter for completion list
+
     btinit();
 
     gtk_init(&argc, &argv);
@@ -82,13 +86,14 @@ int main(int argc, char *argv[])
     // Word completion
     lookupEntryCompletion = gtk_entry_completion_new();
     lookupEntryWordList = gtk_list_store_new(1, G_TYPE_STRING);
-    GtkTreeIter iter;
 
 
     gtk_entry_completion_set_model(lookupEntryCompletion, GTK_TREE_MODEL(lookupEntryWordList));
     gtk_entry_completion_set_match_func(lookupEntryCompletion, (GtkEntryCompletionMatchFunc)lookupEntryMatchFunc, NULL, NULL);
     gtk_entry_set_completion(GTK_ENTRY(lookupEntry), lookupEntryCompletion);
     gtk_entry_completion_set_text_column(lookupEntryCompletion, 0);
+
+    g_signal_connect(lookupEntryCompletion, "match-selected", G_CALLBACK(on_lookup_match_selected), NULL);
 
 
     // Word editing GUI
@@ -156,6 +161,23 @@ void dictLookupPrev(dict_t dict, char * currentWord, GtkTextBuffer * meaningView
 }
  
 // SIGNAL HANDLER - handle signals from GTK GUI
+
+// Lookup a match result from lookup field completion
+int on_lookup_match_selected(GtkEntryCompletion *widget,
+               GtkTreeModel       *model,
+               GtkTreeIter        *iter,
+               gpointer            user_data) {
+    gchar *word;
+    gtk_tree_model_get(model, iter, 0, &word, -1);
+
+    // update lookup field
+    gtk_entry_buffer_set_text(gtk_entry_get_buffer(lookupEntry), word, -1);
+
+    dictLookup(currentDict, word, meaningViewBuff, currentWord);
+    return TRUE;
+}
+
+
 
 void on_next_word_btn() {
     dictLookupNext(currentDict, currentWord, meaningViewBuff);
