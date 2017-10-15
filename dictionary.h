@@ -31,8 +31,6 @@ typedef struct dict_struct {
 	char name[DICTNAME_MAX_LEN];
 	char path[DICTPATH_MAX_LEN];
 	BTA * dict;
-	char ** wordList;
-	int wordListSize;
 } dict_t;
 
 
@@ -41,7 +39,7 @@ typedef struct dict_struct {
 // Tạo từ điển mới (trả về kiểu dict type);
 // - Tạo file với thông tin là filename và gán vào BTA * dict (btcrt);
 // - Tạo wordList có số phần tử là 0 (chỉ malloc cho wordList **)
-dict_t dictCreate(const char * name, const char * path);
+dict_t dictCreate(char * name, char * path);
 
 // mở từ điển đã tạo. đồng thời tạo luôn wordList . nếu thành công trả về 1. xảy ra lỗi gì thì in ra màn hình và trả về 0
 int dictOpen(dict_t * dict);
@@ -49,19 +47,10 @@ int dictOpen(dict_t * dict);
 // đóng từ điển
 int dictClose(dict_t * dict);
 
-// add a word to word list
-void wordListAddWord(char * word, char *** wordList, int * wordListSize);
-
-// tạo wordList cho từ điển
-void wordListBuild(BTA * dict, char *** wordList, int * wordListSize);
-
-// empty a wordList
-void wordListEmpty(char *** wordList, int * wordListSize);
 
 // tạo từ điển mới từ file txt
 //dict_t text2dict(const char * textFileName, const char * dictFileName, GtkTextBuffer  *notifyBuff);
-void createDictionaryDBFromText(dict_t * dict, const char * dictName, const char * textFileName, const char * dbFileName, GtkTextBuffer  *notifyBuff);
-
+void createDictionaryDBFromText(dict_t * dict, char * dictName, char * textFileName, char * dbFileName, GtkTextBuffer  *notifyBuff);
 
 // tra từ
 //  trả về gía trị = gía trị btsel

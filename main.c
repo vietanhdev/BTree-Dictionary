@@ -73,6 +73,9 @@ int main(int argc, char const *argv[])
         gtk_widget_show(GTK_WIDGET(loadDictPromptDialog));
     }
 
+    int he = dictAddWord(currentDict.dict, "testt", "testt", meaningViewBuff);
+    printf("%d\n", he);
+
     
     gtk_widget_show(main_window);
     //g_object_unref(builder);
@@ -133,7 +136,6 @@ void on_lookup_entry_activate() {
 void on_delete_btn_yes() {
     gtk_widget_hide(GTK_WIDGET(wordDeletePromptDialog));
     dictDelWord(currentDict.dict, currentWord, meaningViewBuff);
-    wordListBuild(currentDict.dict, &(currentDict.wordList), &(currentDict.wordListSize));
 }
 
 void on_delete_btn_no() {
@@ -151,16 +153,16 @@ void on_edit_save() {
     GtkTextIter start;
     GtkTextIter end;
 
-    char * word;
-    char * meaning;
+    char word[WORD_MAX_LEN];
+    char meaning[MEAN_MAX_LEN];
 
     gtk_widget_hide(GTK_WIDGET(wordEditWindow));
 
     gtk_text_buffer_get_start_iter (wordEditMeaningBuff, &start);
     gtk_text_buffer_get_end_iter (wordEditMeaningBuff, &end);
 
-    word = (char*)gtk_entry_get_text (GTK_ENTRY(wordEditWordEntry));
-    meaning = gtk_text_buffer_get_text (wordEditMeaningBuff, &start, &end, 1);
+    strcpy(word, (char*)gtk_entry_get_text (GTK_ENTRY(wordEditWordEntry)));
+    strcpy(meaning, (char*)gtk_text_buffer_get_text (wordEditMeaningBuff, &start, &end, 1));
 
 
     printf("Word:'%s'\n", word);
@@ -169,7 +171,7 @@ void on_edit_save() {
     // Delete original word and add new edited word
     dictDelWord(currentDict.dict, wordEditOrigin, NULLnotifyBuff);
     dictAddWord(currentDict.dict, word, meaning, meaningViewBuff);
-
+    //dictAddWord(currentDict.dict, "wordss", "meaning", meaningViewBuff);
 }
 
 void on_edit_cancel() {

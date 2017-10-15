@@ -2,7 +2,7 @@
 
 
 // dictionary list manage
-const char dictListFilename[] = "dictList.dat";
+char dictListFilename[] = "dictList.dat";
 dict_t * dictList;
 int dictListSize;
 dict_t currentDict; // Current selected dict
