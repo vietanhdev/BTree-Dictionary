@@ -73,9 +73,6 @@ int main(int argc, char const *argv[])
         gtk_widget_show(GTK_WIDGET(loadDictPromptDialog));
     }
 
-    int he = dictAddWord(currentDict.dict, "testt", "testt", meaningViewBuff);
-    printf("%d\n", he);
-
     
     gtk_widget_show(main_window);
     //g_object_unref(builder);
@@ -163,10 +160,6 @@ void on_edit_save() {
 
     strcpy(word, (char*)gtk_entry_get_text (GTK_ENTRY(wordEditWordEntry)));
     strcpy(meaning, (char*)gtk_text_buffer_get_text (wordEditMeaningBuff, &start, &end, 1));
-
-
-    printf("Word:'%s'\n", word);
-    printf("Meaning:'%s'\n", meaning);
 
     // Delete original word and add new edited word
     dictDelWord(currentDict.dict, wordEditOrigin, NULLnotifyBuff);
