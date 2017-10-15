@@ -19,7 +19,12 @@ GtkTextBuffer  *NULLnotifyBuff;
 GtkBuilder      *builder; 
 GtkWidget       *main_window;
 
+// Lookup
 GtkEntry *lookupEntry;
+GtkEntryCompletion *lookupEntryCompletion;
+GtkListStore *lookupEntryWordList;
+
+// Meaning view
 GtkTextView *meaningView;
 GtkTextBuffer  *meaningViewBuff;
 
@@ -38,3 +43,14 @@ int wordEditMode; //  = 0: edit a word on dictionary; = 1: add a word to diction
 
 // Word deleting
 GtkDialog * wordDeletePromptDialog;
+
+
+void createInitDB();
+
+gboolean lookupEntryMatchFunc(GtkEntryCompletion *completion,
+    const gchar *key,
+    GtkTreeIter *iter,
+    gpointer user_data);
+
+
+void wordListBuild();

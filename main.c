@@ -21,16 +21,45 @@ void createInitDB() {
     gtk_combo_box_set_active (GTK_COMBO_BOX(dictSelector), 0);
     dictListSave(dictList, dictListSize, dictListFilename);
     currentDict = dict;
+    wordListBuild();
 }
 
-int main(int argc, char const *argv[])
+gboolean lookupEntryMatchFunc(GtkEntryCompletion *completion,
+    const gchar *key,
+    GtkTreeIter *iter,
+    gpointer user_data) {
+    GtkTreeModel *model = gtk_entry_completion_get_model(completion);
+    gchar *item;
+    gtk_tree_model_get(model, iter, 0, &item, -1);
+    gboolean ans = (suggestWordCmp((char *)key, (char *)item) == 1) ? TRUE : FALSE;
+    g_free(item);
+    return ans;
+}
+
+
+void wordListBuild() {
+    int i;
+    BTint value;
+    GtkTreeIter iter;
+
+    char word[WORD_MAX_LEN];
+    btpos(currentDict.dict, ZSTART);
+    while(bnxtky(currentDict.dict, word, &value) == 0) {
+        gtk_list_store_append(lookupEntryWordList, &iter);
+        gtk_list_store_set(lookupEntryWordList, &iter, 0, word, -1);
+    }
+
+}
+
+
+int main(int argc, char *argv[])
 {
     char *locale;
     locale = setlocale(LC_ALL, "");
 
     btinit();
 
-    gtk_init(NULL, NULL);
+    gtk_init(&argc, &argv);
 
     meaningViewBuff = gtk_text_buffer_new(NULL);    
  
@@ -48,6 +77,18 @@ int main(int argc, char const *argv[])
     gtk_text_view_set_buffer (meaningView, meaningViewBuff);
     gtk_text_buffer_set_text(meaningViewBuff, "", -1);
     dictSelector = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(builder, "dict-selector"));
+
+
+    // Word completion
+    lookupEntryCompletion = gtk_entry_completion_new();
+    lookupEntryWordList = gtk_list_store_new(1, G_TYPE_STRING);
+    GtkTreeIter iter;
+
+
+    gtk_entry_completion_set_model(lookupEntryCompletion, GTK_TREE_MODEL(lookupEntryWordList));
+    gtk_entry_completion_set_match_func(lookupEntryCompletion, (GtkEntryCompletionMatchFunc)lookupEntryMatchFunc, NULL, NULL);
+    gtk_entry_set_completion(GTK_ENTRY(lookupEntry), lookupEntryCompletion);
+    gtk_entry_completion_set_text_column(lookupEntryCompletion, 0);
 
 
     // Word editing GUI
@@ -135,6 +176,7 @@ void on_lookup_entry_activate() {
 void on_delete_btn_yes() {
     gtk_widget_hide(GTK_WIDGET(wordDeletePromptDialog));
     dictDelWord(currentDict.dict, currentWord, meaningViewBuff);
+    wordListBuild();
 }
 
 void on_delete_btn_no() {
@@ -173,6 +215,8 @@ void on_edit_save() {
     dictAddWord(currentDict.dict, word, meaning, meaningViewBuff);
     
     gtk_text_buffer_insert_at_cursor (meaningViewBuff, word, -1);
+
+    wordListBuild();
 }
 
 void on_edit_cancel() {
@@ -210,6 +254,19 @@ void on_add_btn() {
     gtk_widget_show(GTK_WIDGET(wordEditWindow));
 }
 
+
+// Change current dict when user update the selector box
+void on_current_dict_change() {
+    char * dictName = gtk_combo_box_text_get_active_text (dictSelector);
+    int i;
+    for (i = 0; i < dictListSize; i++) {
+        if (strcmp(dictName, dictList[i].name) == 0) {
+            currentDict = dictList[i];
+            break;
+        }
+    }
+    wordListBuild();
+}
 
 
 // When starting the dictionary, if a BTree database is not available, use will be prompt to create new database from text file.
