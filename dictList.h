@@ -17,7 +17,8 @@ void dictListOpen(dict_t ** dictList, int * dictListSize, const char * dictListF
 void dictListSave(dict_t * dictList, int dictListSize, const char * dictListFilename);
 
 // Add a dictionary to dict list
-void dictListAddDict(dict_t dict, dict_t ** dictList, int * dictListSize);
+// return 0 if successful
+int dictListAddDict(dict_t dict, dict_t ** dictList, int * dictListSize);
 
 // Remove a dict from dict list using id (0->dictListSize);
 void dictListRemoveDict(dict_t ** dictList, int * dictListSize, int dictID);

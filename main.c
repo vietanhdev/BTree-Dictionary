@@ -137,7 +137,10 @@ int main(int argc, char *argv[])
     dictManagerAddDictName = GTK_ENTRY(gtk_builder_get_object(builder, "dict-manager-add-dict-name"));
     dictManagerAddDictPath = GTK_ENTRY(gtk_builder_get_object(builder, "dict-manager-add-dict-path"));
 
-    // Dict initial loading
+    dictManagerOpeningFailMsgbox = GTK_WIDGET(gtk_builder_get_object(builder, "dict-add-error-msg"));
+    
+
+    // Dict initial 
     loadDictPromptDialog = GTK_DIALOG(gtk_builder_get_object(builder, "load-dict-prompt"));
 
     // Initialize the dictionary list
@@ -426,9 +429,12 @@ void on_dict_manager_close() {
 
 
 
+void dict_manager_opening_error_hide() {
+    gtk_widget_hide(GTK_WIDGET(dictManagerOpeningFailMsgbox));
+}
+
 // Cancel dict. adding
 void on_dict_manager_add_dict_cancel() {
-    
     gtk_widget_hide(GTK_WIDGET(dictManagerAddDictForm));
 }
 
@@ -441,7 +447,10 @@ void on_dict_manager_add_dict_action() {
     str = gtk_entry_get_text (dictManagerAddDictPath);
     strcpy(dict.path, str);
 
-    dictListAddDict(dict, &dictList, &dictListSize);
+    if (dictListAddDict(dict, &dictList, &dictListSize) != 0) {
+        gtk_widget_show(GTK_WIDGET(dictManagerOpeningFailMsgbox));
+        return;
+    };
 
     // Save to disk
     dictListSave(dictList, dictListSize, dictListFilename);

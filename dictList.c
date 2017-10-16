@@ -76,9 +76,16 @@ void dictListSave(dict_t * dictList, int dictListSize, const char * dictListFile
 }
 
 // add a dictionary to list
-void dictListAddDict(dict_t dict, dict_t ** dictList, int * dictListSize) {
+int dictListAddDict(dict_t dict, dict_t ** dictList, int * dictListSize) {
 
-    dictOpen(&(dict));
+    // not opened
+    if (dict.dict == NULL) {
+        dictOpen(&(dict));
+        if (dictOpen != 0) {
+            printf("Cannot add dictionary file: %s\n", dict.path);
+            return 1;
+        }
+    }
 
     *dictList = realloc(*dictList, sizeof(dict_t) * (*dictListSize + 1));
     if (*dictList == NULL) {
@@ -88,7 +95,7 @@ void dictListAddDict(dict_t dict, dict_t ** dictList, int * dictListSize) {
 
     (*dictList)[(*dictListSize)++] = dict;
 
-
+    return 0;
 }
 
 

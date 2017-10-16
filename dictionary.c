@@ -134,19 +134,23 @@ dict_t dictCreate(char* name, char* path) {
     strcpy(newDict.name, name);
     strcpy(newDict.path, path);
 
-    newDict.dict = btcrt(path, 0, FALSE);
+    newDict.dict = btcrt(path, 0, 1);
 
     return newDict;
 }
 
 int dictOpen(dict_t * dict) {
-    dict->dict = btopn(dict->path, 0, FALSE);
+    // Close Btree if opened
+    btcls(dict->dict);
 
-    if(dict->dict != NULL) return 0;
-    else {
+    dict->dict = btopn(dict->path, 0, 1);
+
+    if(dict->dict == NULL) {
         printf("Cannot open BTA file: %s\n", dict->path);
         return 1;
-    } 
+    }
+
+    return 0;
 }
 
 int dictClose(dict_t *dict){

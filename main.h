@@ -66,6 +66,8 @@ GtkWidget * dictManagerAddDictForm;
 GtkEntry * dictManagerAddDictName;
 GtkEntry * dictManagerAddDictPath;
 
+GtkWidget * dictManagerOpeningFailMsgbox;
+
 
 void createInitDB();
 
