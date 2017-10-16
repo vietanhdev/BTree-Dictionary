@@ -440,7 +440,7 @@ void on_dict_manager_add_dict_cancel() {
 
 void on_dict_manager_add_dict_action() {
     dict_t dict;
-    char * str;
+    const char * str;
 
     str = gtk_entry_get_text (dictManagerAddDictName);
     strcpy(dict.name, str);
