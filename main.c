@@ -459,6 +459,13 @@ void on_dict_manager_add_dict_action() {
     dictListUpdateSelector(dictList, dictListSize, dictSelector);
     gtk_combo_box_set_active (GTK_COMBO_BOX(dictSelector), 0);
 
+    // update current dict.
+    if (dictListSize > 0) {
+        currentDict = dictList[0];
+        wordListBuild();
+    } else {
+        currentDict.dict = NULL;
+    }
 
     // update dict. list on dict manager window
     dict_manager_update_dictlist();

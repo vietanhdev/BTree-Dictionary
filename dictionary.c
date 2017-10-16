@@ -140,6 +140,7 @@ dict_t dictCreate(char* name, char* path) {
 }
 
 int dictOpen(dict_t * dict) {
+    
     // Close Btree if opened
     btcls(dict->dict);
 

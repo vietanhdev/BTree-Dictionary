@@ -65,13 +65,26 @@ void dictListOpen(dict_t ** dictList, int * dictListSize, const char * dictListF
 
 // save the dictList database file
 void dictListSave(dict_t * dictList, int dictListSize, const char * dictListFilename) {
+    int i;
+    dict_t dict;
+
     FILE * dbFile;
     if ((dbFile = fopen(dictListFilename, "w")) == NULL) {
         printf("Cannot open dictionary list. Filename : %s\n", dictListFilename);
         exit(1);
     }
 
-    fwrite(dictList, sizeof(dict_t), dictListSize, dbFile);
+
+    for (i = 0; i < dictListSize; ++i) {
+        dict = dictList[i];
+        
+        // Remove BTA pointer before saving
+        // This code is required for adding function to work well
+        dict.dict = NULL;
+
+        fwrite(&dict, sizeof(dict_t), 1, dbFile);
+    }
+    
     fclose(dbFile);
 }
 
@@ -79,12 +92,9 @@ void dictListSave(dict_t * dictList, int dictListSize, const char * dictListFile
 int dictListAddDict(dict_t dict, dict_t ** dictList, int * dictListSize) {
 
     // not opened
-    if (dict.dict == NULL) {
-        dictOpen(&(dict));
-        if (dictOpen != 0) {
-            printf("Cannot add dictionary file: %s\n", dict.path);
-            return 1;
-        }
+    if (dictOpen(&(dict)) != 0) {
+        printf("Cannot add dictionary file: %s\n", dict.path);
+        return 1;
     }
 
     *dictList = realloc(*dictList, sizeof(dict_t) * (*dictListSize + 1));
@@ -118,7 +128,6 @@ void dictListRemoveDict(dict_t ** dictList, int * dictListSize, int dictID) {
 
         newDictList = (dict_t*)malloc(sizeof(dict_t) * (*dictListSize));
 
-        printf("Pass\n");
         if (newDictList == NULL && *dictListSize != 0) {
             printf("A problem happened with memory allocation.\n");
             exit(1);
@@ -130,7 +139,6 @@ void dictListRemoveDict(dict_t ** dictList, int * dictListSize, int dictID) {
             *dictList = newDictList;
         }
 
-        printf("Pass\n");
 
     }
 }
