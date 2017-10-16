@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "dictionary.h"
 #include "dictList.h"
+#include <string.h>
 
 
 void dictListUpdateSelector(dict_t * dictList, int dictListSize, GtkComboBoxText *dictSelector) {
@@ -84,27 +85,59 @@ void dictListAddDict(dict_t dict, dict_t ** dictList, int * dictListSize) {
         printf("Cannot allocate more memory for dictList.\n");
         exit(1);
     }
-    *dictList[(*dictListSize)++] = dict;
-    
+
+    (*dictList)[(*dictListSize)++] = dict;
+
+
 }
 
 
 // remove a dictionary from list
 void dictListRemoveDict(dict_t ** dictList, int * dictListSize, int dictID) {
     int i;
+    dict_t * newDictList;
+
     if (dictID < *dictListSize) {
         // Close dictionary
-        dictClose(&(*dictList[dictID]));
+        dictClose(&((*dictList)[dictID]));
 
         for (i = dictID+1; i < *dictListSize; ++i) {
-            *dictList[dictID-1] = *dictList[dictID];
+            (*dictList)[dictID-1] = (*dictList)[dictID];
         }
+    
 
         // resize the memory
         (*dictListSize)--;
-        if ((*dictList=realloc(*dictList, sizeof(dict_t) * (*dictListSize))) == NULL) {
+
+        newDictList = (dict_t*)malloc(sizeof(dict_t) * (*dictListSize));
+
+        printf("Pass\n");
+        if (newDictList == NULL && *dictListSize != 0) {
             printf("A problem happened with memory allocation.\n");
             exit(1);
+        } else {
+            for (i = 0; i < *dictListSize; i++) {
+                newDictList[i] = (*dictList)[i];
+            }
+            //free(*dictList);
+            *dictList = newDictList;
+        }
+
+        printf("Pass\n");
+
+    }
+}
+
+
+void dictListRemoveDictByNameAndPath(dict_t ** dictList, int * dictListSize, char * dictName, char * dictPath) {
+    int i;
+
+    // exception handle
+    if (dictName == NULL || dictPath == NULL) return;
+
+    for (i = 0; i < *dictListSize; i++) {
+        if (strcmp(dictName, (*dictList)[i].name) == 0 && strcmp(dictPath, (*dictList)[i].path) == 0) {
+            dictListRemoveDict(dictList, dictListSize, i);
         }
     }
 }

@@ -22,6 +22,9 @@ void dictListAddDict(dict_t dict, dict_t ** dictList, int * dictListSize);
 // Remove a dict from dict list using id (0->dictListSize);
 void dictListRemoveDict(dict_t ** dictList, int * dictListSize, int dictID);
 
+void dictListRemoveDictByNameAndPath(dict_t ** dictList, int * dictListSize, char * dictName, char * dictPath);
+
+
 // Update dict. selector on GUI
 void dictListUpdateSelector(dict_t * dictList, int dictListSize, GtkComboBoxText *dictSelector);
 

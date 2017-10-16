@@ -45,6 +45,28 @@ int wordEditMode; //  = 0: edit a word on dictionary; = 1: add a word to diction
 GtkDialog * wordDeletePromptDialog;
 
 
+// About this software
+GtkWidget * aboutWindow;
+
+
+// Dict. manager
+GtkWidget * dictManagerWindow;
+enum
+{
+   NAME_COLUMN,
+   PATH_COLUMN,
+   N_COLUMNS
+};
+GtkTreeView *dictManagerTreeView;
+GtkListStore *dictManagerDictList;
+GtkTreeSelection *dictManagerSelection;
+
+
+GtkWidget * dictManagerAddDictForm;
+GtkEntry * dictManagerAddDictName;
+GtkEntry * dictManagerAddDictPath;
+
+
 void createInitDB();
 
 gboolean lookupEntryMatchFunc(GtkEntryCompletion *completion,

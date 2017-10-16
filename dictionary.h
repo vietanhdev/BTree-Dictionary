@@ -41,7 +41,7 @@ typedef struct dict_struct {
 // - Tạo wordList có số phần tử là 0 (chỉ malloc cho wordList **)
 dict_t dictCreate(char * name, char * path);
 
-// mở từ điển đã tạo. đồng thời tạo luôn wordList . nếu thành công trả về 1. xảy ra lỗi gì thì in ra màn hình và trả về 0
+// mở từ điển đã tạo. đồng thời tạo luôn wordList . nếu thành công trả về 0. xảy ra lỗi gì thì in ra màn hình và trả về 1
 int dictOpen(dict_t * dict);
 
 // đóng từ điển

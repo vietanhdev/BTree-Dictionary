@@ -106,6 +106,37 @@ int main(int argc, char *argv[])
     wordDeletePromptDialog = GTK_DIALOG(gtk_builder_get_object(builder, "del-current-word-prompt"));
 
 
+
+
+    // Dict. manager
+    dictManagerWindow = GTK_WIDGET(gtk_builder_get_object(builder, "dict-manager-window"));
+    
+    dictManagerTreeView = GTK_TREE_VIEW(gtk_builder_get_object(builder, "dict-list-view"));
+    // create a list to store dictionary on GUI
+    dictManagerDictList = gtk_list_store_new (N_COLUMNS, G_TYPE_STRING, G_TYPE_STRING);
+    gtk_tree_view_set_model (dictManagerTreeView, GTK_TREE_MODEL(dictManagerDictList));
+
+    dictManagerSelection = gtk_tree_view_get_selection(GTK_TREE_VIEW(dictManagerTreeView));
+
+    // show the dict list model on list view
+    GtkTreeViewColumn* column;
+    column = gtk_tree_view_column_new_with_attributes("Name",
+                                      gtk_cell_renderer_text_new(),
+                                      "text", NAME_COLUMN,
+                                      NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(dictManagerTreeView), column);
+    column = gtk_tree_view_column_new_with_attributes("Path",
+                                      gtk_cell_renderer_text_new(),
+                                      "text", PATH_COLUMN,
+                                      NULL);
+    gtk_tree_view_append_column(GTK_TREE_VIEW(dictManagerTreeView), column);
+
+
+    // adding dict. form
+    dictManagerAddDictForm = GTK_WIDGET(gtk_builder_get_object(builder, "dict-manager-add-dict-form"));
+    dictManagerAddDictName = GTK_ENTRY(gtk_builder_get_object(builder, "dict-manager-add-dict-name"));
+    dictManagerAddDictPath = GTK_ENTRY(gtk_builder_get_object(builder, "dict-manager-add-dict-path"));
+
     // Dict initial loading
     loadDictPromptDialog = GTK_DIALOG(gtk_builder_get_object(builder, "load-dict-prompt"));
 
@@ -121,6 +152,8 @@ int main(int argc, char *argv[])
         gtk_widget_show(GTK_WIDGET(loadDictPromptDialog));
     }
 
+
+    aboutWindow = GTK_WIDGET(gtk_builder_get_object(builder, "about-window"));
     
     gtk_widget_show(main_window);
     //g_object_unref(builder);
@@ -209,6 +242,8 @@ void on_delete_btn_no() {
 void on_delete_btn() {
     if (strlen(currentWord) > 0) {
         gtk_widget_show(GTK_WIDGET(wordDeletePromptDialog));
+    } else {
+        gtk_text_buffer_set_text(meaningViewBuff, "Enter a word on lookup field and click delete button to delete it from dictionary.", -1);
     }
 }
 
@@ -266,20 +301,36 @@ void on_edit_btn() {
         gtk_text_buffer_set_text (wordEditMeaningBuff,  wordMeaning, strlen(wordMeaning));
         
         gtk_widget_show(GTK_WIDGET(wordEditWindow));
+    } else {
+        gtk_text_buffer_set_text(meaningViewBuff, "Lookup a word first to edit it!", -1);
     }
 }
 
 
 void on_add_btn() {
+
+    // if there is no dictionary loaded
+    if (currentDict.dict == NULL) {
+        gtk_text_buffer_set_text(meaningViewBuff, "There is no dictionary loaded", -1);
+        return;
+    };
+
+
     wordEditMode = 1; // adding mode
     gtk_window_set_title (GTK_WINDOW(wordEditWindow), "Add a word");
     gtk_widget_show(GTK_WIDGET(wordEditWindow));
+    gtk_entry_set_text (GTK_ENTRY(wordEditWordEntry), "");
+    gtk_text_buffer_set_text (wordEditMeaningBuff,  "", -1);
 }
 
 
 // Change current dict when user update the selector box
 void on_current_dict_change() {
     char * dictName = gtk_combo_box_text_get_active_text (dictSelector);
+
+    // handle exception
+    if (dictName == NULL) return;
+
     int i;
     for (i = 0; i < dictListSize; i++) {
         if (strcmp(dictName, dictList[i].name) == 0) {
@@ -288,6 +339,129 @@ void on_current_dict_change() {
         }
     }
     wordListBuild();
+}
+
+
+void on_about_close_btn() {
+    gtk_widget_hide(GTK_WIDGET(aboutWindow));
+}
+
+
+// Click about (info) button
+void on_about_btn() {
+    gtk_widget_show(GTK_WIDGET(aboutWindow));
+}
+
+
+// Dict. manager
+
+void dict_manager_update_dictlist() {
+    int i;
+    GtkTreeIter iter;
+
+    // clear old dict list model
+    gtk_list_store_clear(dictManagerDictList);
+
+    // build a new dict list model
+    for (i = 0; i < dictListSize; i++) {
+        gtk_list_store_insert_with_values(dictManagerDictList, NULL, -1,
+            NAME_COLUMN, dictList[i].name,
+            PATH_COLUMN, dictList[i].path,
+            -1);
+    }
+
+}
+
+void on_dict_manage_btn() {
+    dict_manager_update_dictlist();
+    gtk_widget_show(GTK_WIDGET(dictManagerWindow));
+}
+
+// foreach  deleting selected dict.
+void dict_manager_delete_selected(GtkTreeModel *model, GtkTreePath *path, GtkTreeIter *iter, gpointer userdata) {
+    char *dictName;
+    char *dictPath;
+
+
+    // Delete dict. from the list
+    gtk_tree_model_get(model, iter, NAME_COLUMN, &dictName, -1);
+    gtk_tree_model_get(model, iter, PATH_COLUMN, &dictPath, -1);
+    dictListRemoveDictByNameAndPath(&dictList, &dictListSize, dictName, dictPath);
+    
+
+    // Save to disk
+    dictListSave(dictList, dictListSize, dictListFilename);
+
+
+    // Update dict selector for GUI
+    dictListUpdateSelector(dictList, dictListSize, dictSelector);
+    gtk_combo_box_set_active (GTK_COMBO_BOX(dictSelector), 0);
+    
+
+    // update current dict.
+    if (dictListSize > 0) {
+        currentDict = dictList[0];
+        wordListBuild();
+    } else {
+        currentDict.dict = NULL;
+    }
+
+
+    // update dict. list on dict manager window
+    dict_manager_update_dictlist();
+
+    // Free memory
+    g_free(dictName);
+    g_free(dictPath);
+}
+void on_dict_manager_delete_btn() {
+    gtk_tree_selection_selected_foreach(dictManagerSelection, dict_manager_delete_selected, NULL);
+}
+
+// close the dict. manager
+void on_dict_manager_close() {
+    gtk_widget_hide(GTK_WIDGET(dictManagerWindow));
+}
+
+
+
+
+// Cancel dict. adding
+void on_dict_manager_add_dict_cancel() {
+    
+    gtk_widget_hide(GTK_WIDGET(dictManagerAddDictForm));
+}
+
+void on_dict_manager_add_dict_action() {
+    dict_t dict;
+    char * str;
+
+    str = gtk_entry_get_text (dictManagerAddDictName);
+    strcpy(dict.name, str);
+    str = gtk_entry_get_text (dictManagerAddDictPath);
+    strcpy(dict.path, str);
+
+    dictListAddDict(dict, &dictList, &dictListSize);
+
+    // Save to disk
+    dictListSave(dictList, dictListSize, dictListFilename);
+
+    // Update dict selector for GUI
+    dictListUpdateSelector(dictList, dictListSize, dictSelector);
+    gtk_combo_box_set_active (GTK_COMBO_BOX(dictSelector), 0);
+
+
+    // update dict. list on dict manager window
+    dict_manager_update_dictlist();
+
+    on_dict_manager_add_dict_cancel();
+}
+
+// Add a dictionary button
+void on_dict_manager_add_dict_btn() {
+    gtk_entry_set_text (dictManagerAddDictName, "");
+    gtk_entry_set_text (dictManagerAddDictPath, "");
+    gtk_widget_show(GTK_WIDGET(dictManagerAddDictForm));
 }
 
 

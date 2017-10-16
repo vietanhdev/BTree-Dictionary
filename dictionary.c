@@ -135,7 +135,6 @@ dict_t dictCreate(char* name, char* path) {
     strcpy(newDict.path, path);
 
     newDict.dict = btcrt(path, 0, FALSE);
-    
 
     return newDict;
 }
@@ -143,8 +142,11 @@ dict_t dictCreate(char* name, char* path) {
 int dictOpen(dict_t * dict) {
     dict->dict = btopn(dict->path, 0, FALSE);
 
-    if(dict->dict != NULL) return 1;
-    else return 0;
+    if(dict->dict != NULL) return 0;
+    else {
+        printf("Cannot open BTA file: %s\n", dict->path);
+        return 1;
+    } 
 }
 
 int dictClose(dict_t *dict){
@@ -156,6 +158,9 @@ int dictClose(dict_t *dict){
 // To determin if str is prefix of word
 // return 1: is prefix; 0: not prefix; 2: str=word
 int suggestWordCmp(char * str, char * word) {
+    // Handle exception
+    if (str == NULL || word == NULL) return 0;
+
     int i;
     if (strcmp(str, word) == 0) return 2;
     if (strlen(str) > strlen(word)) return 0;
