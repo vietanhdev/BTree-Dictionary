@@ -1,3 +1,8 @@
+#ifndef DICTIONARY_H
+#define DICTIONARY_H
+
+#include <gtk/gtk.h>
+
 #define WORD_MAX_LEN 200
 #define MEAN_MAX_LEN 40000
 #define LINE_MAX_LEN 40000
@@ -9,6 +14,9 @@
 #define SUGGEST_BOX_MAX_LEN 10000
 #define SUGGEST_WORD_NUM 5
 
+#define DICTNAME_MAX_LEN 200
+#define DICTPATH_MAX_LEN 500
+
 #ifndef ZKYLEN
 #define ZKYLEN WORD_MAX_LEN
 #endif
@@ -18,15 +26,56 @@
 extern char ** dictWordList;
 extern int dictWordListSize;
 
-void createDictionary(BTA ** dict, char * notify);
-int dictFindWord(BTA *dict, char * word, char * meaning);
-int dictAddWord(BTA *dict, char * word, char * meaning);
-char *rand_string(char *str, size_t size);
-void createDictionaryRandom(BTA *dict);
-void makeWordList(BTA * dict, char *** wordList, int * wordListSize);
-void wordListAddWord(char * word, char *** wordList, int * wordListSize);
-void wordListRemoveWord(char * word, char *** wordList, int * wordListSize);
-void wordListEmpty(char *** wordList, int * wordListSize);
-int wordListSuggest(char * suggestStr, char * str, char ** wordList, int wordListSize);
+
+typedef struct dict_struct {
+	char name[DICTNAME_MAX_LEN];
+	char path[DICTPATH_MAX_LEN];
+	BTA * dict;
+} dict_t;
+
+
+// New functions: Các function bên dưới sẽ viết lại
+
+// Tạo từ điển mới (trả về kiểu dict type);
+// - Tạo file với thông tin là filename và gán vào BTA * dict (btcrt);
+// - Tạo wordList có số phần tử là 0 (chỉ malloc cho wordList **)
+dict_t dictCreate(char * name, char * path);
+
+// mở từ điển đã tạo. đồng thời tạo luôn wordList . nếu thành công trả về 0. xảy ra lỗi gì thì in ra màn hình và trả về 1
+int dictOpen(dict_t * dict);
+
+// đóng từ điển
+int dictClose(dict_t * dict);
+
+
+// tạo từ điển mới từ file txt
+//dict_t text2dict(const char * textFileName, const char * dictFileName, GtkTextBuffer  *notifyBuff);
+void createDictionaryDBFromText(dict_t * dict, char * dictName, char * textFileName, char * dbFileName, GtkTextBuffer  *notifyBuff);
+
+// tra từ
+//  trả về gía trị = gía trị btsel
+int dictFindWord(dict_t dict, const char * word, char * meaning);
+
+// tra tu tiep theo.
+// sau khi tra tu se thay current word thanh tu tiep theo tra duoc (neu co)
+int dictFindNextWord(dict_t dict, char * currentWord, char * meaning);
+
+// tra tu truoc do
+// sau khi tra tu se thay current word thanh tu truoc do (neu co)
+int dictFindPrevWord(dict_t dict, char * currentWord, char * meaning);
+
+
+// thực hiện so sánh để chọn suggest trong hàm wordListSuggest();
 int suggestWordCmp(char * str, char * word);
 
+// Give suggestion based on "str"
+int wordListSuggest(char * str, char ** suggestList, int suggestListMaxSize, dict_t dict);
+
+// add word to dictionary
+int dictAddWord(BTA * dict, char * word, char * meaning, GtkTextBuffer  *notifyBuff);
+
+
+// delete word from dictionary
+void dictDelWord(BTA * dict, char * word, GtkTextBuffer  *notifyBuff);
+
+#endif

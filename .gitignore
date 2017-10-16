@@ -1,5 +1,7 @@
 *.o
 Bdict
+evdict
 *.dat
 ._*
 .DS_Store
+run

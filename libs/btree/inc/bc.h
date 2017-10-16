@@ -44,9 +44,6 @@ typedef int BTint;
 
 #define DEBUG 0
 
-#define TRUE 1
-#define FALSE 0
-
 #define LFSHDR 0xFFBADDEF
 
 /* Implementation defined constants */
