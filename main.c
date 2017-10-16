@@ -12,47 +12,6 @@
 #include "main.h"
 
 
-// Create a initial database when no database is avaiable
-void createInitDB() {
-    dict_t dict;
-    createDictionaryDBFromText(&dict, "E-V dict.", "EV_text_dict.txt", "BTree_dict.dat", meaningViewBuff);
-    dictListAddDict(dict, &dictList, &dictListSize);
-    dictListUpdateSelector(dictList, dictListSize, dictSelector);
-    gtk_combo_box_set_active (GTK_COMBO_BOX(dictSelector), 0);
-    dictListSave(dictList, dictListSize, dictListFilename);
-    currentDict = dict;
-    wordListBuild();
-}
-
-
-// Match function for lookup completion
-gboolean lookupEntryMatchFunc(GtkEntryCompletion *completion,
-                                    const gchar *key,
-                                    GtkTreeIter *iter,
-                                    gpointer user_data) {
-    GtkTreeModel *model = gtk_entry_completion_get_model(completion);
-    gchar *item;
-    gtk_tree_model_get(model, iter, 0, &item, -1);
-    gboolean ans = (suggestWordCmp((char *)key, (char *)item) == 1) ? TRUE : FALSE;
-    g_free(item);
-    return ans;
-}
-
-
-void wordListBuild() {
-    int i;
-    BTint value;
-    GtkTreeIter iter;
-
-    char word[WORD_MAX_LEN];
-    btpos(currentDict.dict, ZSTART);
-    while(bnxtky(currentDict.dict, word, &value) == 0) {
-        gtk_list_store_append(lookupEntryWordList, &iter);
-        gtk_list_store_set(lookupEntryWordList, &iter, 0, word, -1);
-    }
-
-}
-
 
 int main(int argc, char *argv[])
 {
@@ -162,6 +121,53 @@ int main(int argc, char *argv[])
     //g_object_unref(builder);
     gtk_main();
     return 0;
+}
+
+
+// Create a initial database when no database is avaiable
+void createInitDB() {
+    dict_t dict;
+    createDictionaryDBFromText(&dict, "E-V dict.", "EV_text_dict.txt", "BTree_dict.dat", meaningViewBuff);
+    dictListAddDict(dict, &dictList, &dictListSize);
+    dictListUpdateSelector(dictList, dictListSize, dictSelector);
+    gtk_combo_box_set_active (GTK_COMBO_BOX(dictSelector), 0);
+    dictListSave(dictList, dictListSize, dictListFilename);
+    currentDict = dict;
+    wordListBuild();
+}
+
+
+// Match function for lookup completion
+gboolean lookupEntryMatchFunc(GtkEntryCompletion *completion,
+                                    const gchar *key,
+                                    GtkTreeIter *iter,
+                                    gpointer user_data) {
+    GtkTreeModel *model = gtk_entry_completion_get_model(completion);
+    gchar *item;
+    gtk_tree_model_get(model, iter, 0, &item, -1);
+    gboolean ans = (suggestWordCmp((char *)key, (char *)item) == 1) ? TRUE : FALSE;
+    g_free(item);
+    return ans;
+}
+
+
+// Build a word list for lookup completion
+void wordListBuild() {
+    int i;
+    BTint value;
+    GtkTreeIter iter;
+
+    char word[WORD_MAX_LEN];
+
+    // Clear old list
+    gtk_list_store_clear (lookupEntryWordList);
+
+    btpos(currentDict.dict, ZSTART);
+    while(bnxtky(currentDict.dict, word, &value) == 0) {
+        gtk_list_store_append(lookupEntryWordList, &iter);
+        gtk_list_store_set(lookupEntryWordList, &iter, 0, word, -1);
+    }
+
 }
 
 
