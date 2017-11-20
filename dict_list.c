@@ -2,7 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "dictionary.h"
-#include "dictList.h"
+#include "dict_list.h"
 #include <string.h>
 
 

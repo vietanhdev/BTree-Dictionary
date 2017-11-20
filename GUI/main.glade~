@@ -275,6 +275,7 @@
                     <property name="justification">fill</property>
                     <property name="cursor_visible">False</property>
                     <property name="buffer">meaning-view-buff</property>
+                    <property name="input_purpose">alpha</property>
                   </object>
                 </child>
               </object>

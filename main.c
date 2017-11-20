@@ -5,10 +5,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include "extio.h"
+#include "string_ext.h"
 #include "dictionary.h"
 #define ZKYLEN WORD_MAX_LEN
 #include "btree.h"
-#include "dictList.h"
+#include "dict_list.h"
 #include "main.h"
 
 
@@ -16,7 +17,7 @@
 int main(int argc, char *argv[])
 {
     char *locale;
-    locale = setlocale(LC_ALL, "");
+    locale = setlocale(LC_ALL, "UTF-8");
 
     GtkTreeIter iter; // iter for completion list
 
@@ -173,33 +174,55 @@ void wordListBuild() {
 
 void dictLookup(dict_t dict, const char * word, GtkTextBuffer * meaningViewBuff, char * currentWord) {
     char meaning[MEAN_MAX_LEN];
+    gchar * utf_meaning;
+
     int searchResult = dictFindWord(dict, word, meaning);
+
+
     if (searchResult != 0) {
         gtk_text_buffer_set_text(meaningViewBuff, "Not found!", -1);
     } else {
         strcpy(currentWord, word);
-        gtk_text_buffer_set_text(meaningViewBuff, meaning, -1);
+        utf_meaning = g_utf8_make_valid_custom (meaning, -1);
+       
+        gtk_text_buffer_set_text(meaningViewBuff, utf_meaning, -1);
     }
+
+   // g_free(utf_meaning);
 }
 
 void dictLookupNext(dict_t dict, char * currentWord, GtkTextBuffer * meaningViewBuff) {
+    gchar * utf_meaning;
+
     char meaning[MEAN_MAX_LEN];
     int searchResult = dictFindNextWord(dict, currentWord, meaning);
+
+
     if (searchResult != 0) {
         gtk_text_buffer_set_text(meaningViewBuff, "There is no next word!", -1);
     } else {
-        gtk_text_buffer_set_text(meaningViewBuff, meaning, -1);
+        utf_meaning = g_utf8_make_valid_custom (meaning, -1);
+        gtk_text_buffer_set_text(meaningViewBuff, utf_meaning, -1);
     }
+
+    g_free(utf_meaning);
 }
 
 void dictLookupPrev(dict_t dict, char * currentWord, GtkTextBuffer * meaningViewBuff) {
+    gchar * utf_meaning;
+    
     char meaning[MEAN_MAX_LEN];
+
+    
     int searchResult = dictFindPrevWord(dict, currentWord, meaning);
     if (searchResult != 0) {
         gtk_text_buffer_set_text(meaningViewBuff, "There is no previous word!", -1);
     } else {
-        gtk_text_buffer_set_text(meaningViewBuff, meaning, -1);
+        utf_meaning = g_utf8_make_valid_custom (meaning, -1);
+        gtk_text_buffer_set_text(meaningViewBuff, utf_meaning, -1);
     }
+
+    g_free(utf_meaning);
 }
  
 // SIGNAL HANDLER - handle signals from GTK GUI
@@ -260,16 +283,16 @@ void on_edit_save() {
     GtkTextIter start;
     GtkTextIter end;
 
-    char word[WORD_MAX_LEN];
-    char meaning[MEAN_MAX_LEN];
+    gchar * word;
+    gchar * meaning;
 
     gtk_widget_hide(GTK_WIDGET(wordEditWindow));
 
     gtk_text_buffer_get_start_iter (wordEditMeaningBuff, &start);
     gtk_text_buffer_get_end_iter (wordEditMeaningBuff, &end);
 
-    strcpy(word, (char*)gtk_entry_get_text (GTK_ENTRY(wordEditWordEntry)));
-    strcpy(meaning, (char*)gtk_text_buffer_get_text (wordEditMeaningBuff, &start, &end, 1));
+    word = (gchar*) gtk_entry_get_text (GTK_ENTRY(wordEditWordEntry));
+    meaning = (gchar*) gtk_text_buffer_get_text (wordEditMeaningBuff, &start, &end, 1);
 
     if (wordEditMode == 0) { // edit word
         // Delete original word and add new edited word
@@ -283,6 +306,9 @@ void on_edit_save() {
     gtk_text_buffer_insert_at_cursor (meaningViewBuff, word, -1);
 
     wordListBuild();
+
+    g_free(word);
+    g_free(meaning);
 }
 
 void on_edit_cancel() {
@@ -313,6 +339,8 @@ void on_edit_btn() {
     } else {
         gtk_text_buffer_set_text(meaningViewBuff, "Lookup a word first to edit it!", -1);
     }
+
+    g_free(wordMeaning);
 }
 
 
@@ -335,7 +363,7 @@ void on_add_btn() {
 
 // Change current dict when user update the selector box
 void on_current_dict_change() {
-    char * dictName = gtk_combo_box_text_get_active_text (dictSelector);
+    gchar * dictName = gtk_combo_box_text_get_active_text (dictSelector);
 
     // handle exception
     if (dictName == NULL) return;
@@ -348,6 +376,8 @@ void on_current_dict_change() {
         }
     }
     wordListBuild();
+
+    g_free(dictName);
 }
 
 
@@ -446,11 +476,11 @@ void on_dict_manager_add_dict_cancel() {
 
 void on_dict_manager_add_dict_action() {
     dict_t dict;
-    const char * str;
+    gchar * str;
 
-    str = gtk_entry_get_text (dictManagerAddDictName);
+    str = (gchar *)gtk_entry_get_text (dictManagerAddDictName);
     strcpy(dict.name, str);
-    str = gtk_entry_get_text (dictManagerAddDictPath);
+    str = (gchar *)gtk_entry_get_text (dictManagerAddDictPath);
     strcpy(dict.path, str);
 
     if (dictListAddDict(dict, &dictList, &dictListSize) != 0) {
@@ -477,6 +507,8 @@ void on_dict_manager_add_dict_action() {
     dict_manager_update_dictlist();
 
     on_dict_manager_add_dict_cancel();
+
+    g_free(str);
 }
 
 // Add a dictionary button
@@ -501,4 +533,9 @@ void on_load_dict_no (GtkWidget *widget, gpointer data) {
 // called when window is closed
 void on_window_main_destroy() {
     gtk_main_quit();
+}
+
+
+void close_word_edit() {
+    gtk_widget_hide(GTK_WIDGET(wordEditWindow));
 }

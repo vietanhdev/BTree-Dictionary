@@ -5,7 +5,7 @@ CC=gcc
 # compiling flags here
 CFLAGS= -g -Wall
 
-IDIR = libs/btree/inc
+IDIR = ./libs/btree/inc
 # define any directories containing header file other then /usr/include
 INCLUDES = -I $(IDIR)
 

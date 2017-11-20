@@ -260,7 +260,7 @@ int dictFindWord(dict_t dict, const char * word, char * meaning) {
     int return_value;
     int meaningLength;
     char * wordLower;
-
+    
 
     wordLower = malloc(WORD_MAX_LEN * sizeof(char));
     if (wordLower == NULL) {
@@ -269,8 +269,13 @@ int dictFindWord(dict_t dict, const char * word, char * meaning) {
     }
 
     strLower(wordLower, word);
+    
     return_value =  btsel(dict.dict, wordLower, meaning, MEAN_MAX_LEN, &meaningLength);
+    
     free(wordLower);
+
+    // Add ending signal to meaning
+    meaning[meaningLength] = 0;
 
     return return_value;
 }
@@ -285,6 +290,9 @@ int dictFindNextWord(dict_t dict, char * currentWord, char * meaning) {
 
     ret =  btseln(dict.dict, currentWord, meaning, MEAN_MAX_LEN, &meaningLength);
 
+    // Add ending signal to meaning
+    meaning[meaningLength] = 0;
+
     return ret;
 }
 
@@ -297,6 +305,9 @@ int dictFindPrevWord(dict_t dict, char * currentWord, char * meaning) {
     bfndky(dict.dict, currentWord, &value);
 
     ret =  btselp(dict.dict, currentWord, meaning, MEAN_MAX_LEN, &meaningLength);
+
+    // Add ending signal to meaning
+    meaning[meaningLength] = 0;
 
     return ret;
 }

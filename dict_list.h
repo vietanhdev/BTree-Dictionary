@@ -1,3 +1,6 @@
+#ifndef DICT_LIST_H
+#define DICT_LIST_H
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "dictionary.h"
@@ -26,7 +29,8 @@ void dictListRemoveDict(dict_t ** dictList, int * dictListSize, int dictID);
 void dictListRemoveDictByNameAndPath(dict_t ** dictList, int * dictListSize, char * dictName, char * dictPath);
 
 
-// Update dict. selector on GUI
+// Update diDICT_LIST_Hct. selector on GUI
 void dictListUpdateSelector(dict_t * dictList, int dictListSize, GtkComboBoxText *dictSelector);
 
 
+#endif

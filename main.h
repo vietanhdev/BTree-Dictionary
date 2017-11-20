@@ -1,5 +1,6 @@
 // BTree dictionary variables
-
+#ifndef MAIN_H
+#define MAIN_H
 
 // dictionary list manage
 char dictListFilename[] = "dictList.dat";
@@ -155,3 +156,7 @@ void on_dict_manager_add_dict_action(); // Click add button when adding a dictio
 
 
 void on_window_main_destroy();
+
+
+
+#endif
